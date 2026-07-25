@@ -1,0 +1,59 @@
+# Built application files
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Java / Kotlin class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+release/
+
+# Gradle
+.gradle/
+build/
+local.properties
+
+# Gradle cached files that must never be committed
+.gradletasknamecache
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystores and signing material — NEVER commit these
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+service-account.json
+google-play-api-key.json
+
+# NDK
+obj/
+
+# Log / build output scratch files
+*.log
+build_log.txt
+build_error*.txt
+hs_err_pid*
+
+# macOS / Windows cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output

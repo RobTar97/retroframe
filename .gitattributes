@@ -1,0 +1,17 @@
+# Normalise line endings so Windows and Linux contributors don't fight
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF
+*.bat text eol=crlf
+
+# Gradle wrapper script must stay executable and LF
+gradlew text eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.jar binary
+*.keystore binary
+*.jks binary
