@@ -1,0 +1,47 @@
+There is a drawer in most homes with a tablet in it. It still turns on. The battery is tired, the browser is too old for the modern web, and nobody has touched it in years. It isn't broken — it's just no longer useful.
+
+A tablet is a screen, a power port, and some storage. That's exactly a digital photo frame, and commercial photo frames cost real money to do less.
+
+RetroFrame turns that tablet into a photo frame. Point it at a folder. It shows your photos. That's the whole app.
+
+<b>Built for old hardware</b>
+
+RetroFrame is written for a 2015 tablet with 1 GB of RAM and an Android version that stopped getting updates a long time ago — not for a flagship phone that happens to also run it. Runs on Android 5.1 and up.
+
+<b>Your photos stay yours</b>
+
+• No account, ever
+• No cloud service, no sync, no upload
+• No analytics, no crash reporting, no telemetry
+• Reads only the one folder you choose, and never writes to it
+
+The app makes no network requests at all. There is no server for your photos to go to.
+
+<b>Features</b>
+
+• Slideshow from any folder, including SD cards and USB storage
+• Photos: JPEG, PNG, GIF, BMP, WebP
+• Videos: MP4, MKV, WebM, AVI, MOV — muted by default
+• Adjustable interval from 5 seconds to 1 hour
+• Pinch-to-zoom on any photo
+• Mark favourites with a tap — they come around about 3× as often
+• Picks up photos added to the folder while it's running
+
+<b>Scheduling — the part that makes it a permanent fixture</b>
+
+• Wake time: turns the screen on and starts the slideshow
+• Sleep time: drops to a big fullscreen clock and lets the screen turn off
+• Optional daily morning alarm with sound
+• Auto-start after a reboot, so a power cut doesn't leave a blank screen
+
+<b>Stays out of the way</b>
+
+Fullscreen and immersive — no status bar, no navigation bar. Controls stay hidden until you tap, then hide themselves again. Large touch targets, sized for old low-resolution screens.
+
+<b>Free software</b>
+
+RetroFrame is licensed under the GNU GPL v3. The source code is public, and you're free to use, study, share, and modify it. It is not funded by ads, subscriptions, or your data, and it never will be.
+
+<b>Please note</b>
+
+This is early software. It works, but it has known rough edges — all of them documented publicly in the project's KNOWN_ISSUES file rather than hidden. Bug reports are welcome, and reports about what happened on your particular old tablet are the most useful thing you can send.

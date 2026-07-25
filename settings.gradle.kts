@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Photoframe"
+rootProject.name = "RetroFrame"
 include(":app")

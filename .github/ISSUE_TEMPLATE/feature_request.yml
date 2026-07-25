@@ -1,0 +1,70 @@
+name: Feature request
+description: Suggest something RetroFrame should do
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before writing this up, please skim the **Roadmap** in the
+        [README](../blob/main/README.md#roadmap) — it lists both what's planned and what
+        is explicitly out of scope (cloud photo services, analytics, an iOS version).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the situation, not the solution
+      placeholder: |
+        My photos are organised into subfolders by year, and RetroFrame only reads
+        the top level, so I'd have to flatten them all into one directory.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: What would you like it to do?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: old-hardware
+    attributes:
+      label: Would this work on a 1 GB tablet running Android 5.1?
+      description: |
+        The project targets old, slow hardware. Features that need significant memory,
+        CPU, or a network connection are a hard sell — that's the whole design constraint.
+      options:
+        - "Yes — it's lightweight"
+        - "Probably, but it would need care"
+        - "Not sure"
+        - "No, it needs modern hardware"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      description: Please confirm this fits the project's goals
+      options:
+        - label: This doesn't require a network connection, an account, or a cloud service
+          required: true
+        - label: This doesn't require Google Play Services
+          required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+      description: Including "I currently work around it by..."
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Would you be willing to work on this?
+      options:
+        - label: I'd be interested in implementing it myself
+          required: false
+        - label: I could help test it on old hardware
+          required: false

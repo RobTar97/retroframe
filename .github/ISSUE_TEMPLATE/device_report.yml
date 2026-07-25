@@ -1,0 +1,100 @@
+name: Device report
+description: Tell us how RetroFrame ran on your old tablet — works or not, both are useful
+title: "[Device] "
+labels: ["device-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **This is the single most valuable contribution to the project.**
+
+        RetroFrame targets hardware that can't be bought new and can't be emulated
+        faithfully. Emulators don't reproduce slow eMMC storage, thermal throttling, or
+        the aggressive power management that manufacturers shipped on these devices —
+        and that's where nearly every real bug lives.
+
+        Reports of things working are as useful as reports of things breaking. Both
+        build the compatibility table.
+
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      placeholder: Nexus 7 (2013), Amazon Fire HD 8 (2017), Lenovo Tab M10...
+    validations:
+      required: true
+
+  - type: input
+    id: android-version
+    attributes:
+      label: Android version
+      placeholder: Android 6.0.1 (API 23)
+    validations:
+      required: true
+
+  - type: input
+    id: specs
+    attributes:
+      label: RAM and screen resolution
+      description: Usually findable by searching the model number
+      placeholder: 1 GB RAM, 1280x800
+
+  - type: dropdown
+    id: overall
+    attributes:
+      label: Overall, how did it go?
+      options:
+        - Works well — I'd use this daily
+        - Works, but with problems
+        - Barely usable
+        - Doesn't work at all
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: features
+    attributes:
+      label: Which features did you get working?
+      description: Leave unchecked anything you didn't test or couldn't get working
+      options:
+        - label: Folder selection
+        - label: Photo slideshow
+        - label: Video playback
+        - label: Pinch-to-zoom
+        - label: Favourites
+        - label: Clock mode
+        - label: Wake schedule (screen turns on at the set time)
+        - label: Sleep schedule (drops to clock mode, screen turns off)
+        - label: Morning alarm
+        - label: Auto-start on boot
+        - label: Detects photos added to the folder while running
+
+  - type: textarea
+    id: problems
+    attributes:
+      label: What didn't work?
+      description: Be as specific as you can
+
+  - type: textarea
+    id: performance
+    attributes:
+      label: How did it perform?
+      description: |
+        Especially interested in: how many photos in your folder, whether transitions
+        stuttered, whether it stayed stable over hours or days, and whether the device
+        got hot.
+      placeholder: |
+        ~800 photos on an SD card. Smooth for the first hour, then transitions started
+        stuttering. Device was noticeably warm after running overnight.
+
+  - type: input
+    id: duration
+    attributes:
+      label: How long did you run it for?
+      placeholder: A few minutes / overnight / two weeks and counting
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
+      description: Custom ROM, battery removed, wall mount, power supply quirks — all welcome

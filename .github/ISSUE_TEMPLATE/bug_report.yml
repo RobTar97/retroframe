@@ -1,0 +1,102 @@
+name: Bug report
+description: Something in RetroFrame doesn't work the way it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this.
+
+        **Please check [docs/KNOWN_ISSUES.md](../blob/main/docs/KNOWN_ISSUES.md) first** —
+        a number of defects are already documented there, including the shuffle setting
+        doing nothing and the slideshow jumping when you favourite a photo.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what did you get instead?
+      placeholder: |
+        I set the sleep time to 23:00, but at 23:00 the slideshow kept running
+        and the screen never turned off.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open settings
+        2. Set sleep time to 23:00
+        3. Save and wait
+        4. ...
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: Make and model — old and obscure is genuinely useful here
+      placeholder: Samsung Galaxy Tab A 10.1 (2016), SM-T580
+    validations:
+      required: true
+
+  - type: input
+    id: android-version
+    attributes:
+      label: Android version
+      placeholder: Android 7.0 (API 24)
+    validations:
+      required: true
+
+  - type: input
+    id: app-version
+    attributes:
+      label: RetroFrame version
+      description: Version number, or the commit hash if you built from source
+      placeholder: v0.1.0 / commit abc1234
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the app?
+      options:
+        - Slideshow (photos)
+        - Video playback
+        - Wake / sleep schedule
+        - Morning alarm
+        - Clock mode
+        - Settings
+        - Folder selection / permissions
+        - Auto-start on boot
+        - Startup / crash
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        If you can, attach logcat output. Filtered is fine:
+        `adb logcat | grep -E "PhotoRepository|ScreenManager|DirectoryWatcher|AlarmScheduler|AndroidRuntime"`
+      render: shell
+
+  - type: checkboxes
+    id: schedule-permission
+    attributes:
+      label: If this is about the schedule or alarm
+      options:
+        - label: "I confirmed *Alarms & reminders* is allowed under Settings → Apps → RetroFrame (Android 12+)"
+          required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
+      description: Media formats involved, folder size, SD card vs internal storage, battery removed, etc.
