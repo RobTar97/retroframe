@@ -1,11 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  Android 12+ backup rules. See backup_rules.xml for the reasoning; the folder URI is
+  validated at runtime rather than excluded here.
+-->
 <data-extraction-rules>
     <cloud-backup>
-        <include domain="sharedpref" path="."/>
-        <exclude domain="sharedpref" path="device_specific_prefs.xml"/>
+        <include
+            domain="sharedpref"
+            path="." />
     </cloud-backup>
     <device-transfer>
-        <include domain="sharedpref" path="."/>
-        <exclude domain="sharedpref" path="device_specific_prefs.xml"/>
+        <include
+            domain="sharedpref"
+            path="." />
     </device-transfer>
 </data-extraction-rules>

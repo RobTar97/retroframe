@@ -42,18 +42,19 @@ Not because they are bad ideas, but because they contradict what this project is
 
 ### Things that are actively wanted
 
+- **Device reports.** Genuinely the scarce resource — see above
 - Fixes for anything in [KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)
-- Tests — there are currently none, and the pure-logic pieces are easy targets
+- Tests, especially UI and instrumentation coverage, which does not exist yet
 - Translations
 - Accessibility improvements
 - Anything that measurably reduces memory use, battery drain, or startup time
 
 ## Development setup
 
-**Requirements:** JDK 17, Android SDK with API 34 platform. Android Studio bundles both.
+**Requirements:** JDK 17, Android SDK with the API 36 platform. Android Studio bundles both.
 
 ```bash
-git clone https://github.com/YOUR-GITHUB-USERNAME/retroframe.git
+git clone https://github.com/RobTar97/retroframe.git
 cd retroframe
 ./gradlew assembleDebug          # Windows: gradlew.bat assembleDebug
 ```
@@ -62,14 +63,17 @@ Android Studio will create `local.properties` with your SDK path on first open. 
 gitignored — never commit it.
 
 ```bash
-./gradlew assembleDebug   # build
-./gradlew lint            # Android lint
-./gradlew test            # unit tests (none yet — please add some)
+./gradlew assembleDebug     # debug build
+./gradlew assembleRelease   # R8-minified release build (~3 MB, unsigned without a keystore)
+./gradlew test              # 30 unit tests
+./gradlew lint              # Android lint
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Note that `./gradlew assembleRelease` currently **fails** — see issue #1 in
-[KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md).
+CI runs all four on every pull request.
+
+Debug builds use the application ID `com.rober.photoframe.debug`, so a debug build and a
+release build can sit side by side on the same tablet.
 
 ### Testing on a real device
 
@@ -80,12 +84,16 @@ just be upfront about it.
 Useful during development:
 
 ```bash
-adb logcat | grep -E "PhotoRepository|ScreenManager|DirectoryWatcher|AlarmScheduler"
+adb logcat | grep -E "PhotoRepository|ScreenManager|FolderMonitor|AlarmScheduler|AlarmCompat"
 ```
 
-Testing the schedule without waiting overnight: set wake and sleep a couple of minutes
-apart, lock the device, and watch. On Android 12+ confirm *Alarms & reminders* is granted
-under **Settings → Apps → RetroFrame**, or the alarms will silently never fire.
+Testing the schedule without waiting overnight: set wake and sleep a couple of minutes apart,
+lock the device, and watch. The schedule now falls back to inexact alarms when the system
+withholds exact ones, so it fires either way — but it may be up to a minute late, which is
+worth knowing before you report it as broken.
+
+**Please also test release builds.** R8 is newly enabled, and reflection failures in Media3 or
+Glide would show up only there.
 
 ## Code style
 
@@ -93,6 +101,8 @@ Match what is already there. Concretely:
 
 - Standard [Kotlin conventions](https://kotlinlang.org/docs/coding-conventions.html);
   `kotlin.code.style=official` is set in `gradle.properties`
+- Keep logic that can be pure, pure. `PlaylistBuilder` and `MediaTypes` have no Android
+  dependencies, which is exactly why they are the parts under test
 - 4-space indent, no tabs, LF line endings (enforced by `.gitattributes`)
 - **Use `.commit()`, not `.apply()`, for SharedPreferences.** This is deliberate — a photo
   frame loses power abruptly, and an async write that has not reached disk is a setting the
@@ -109,7 +119,7 @@ method count on a device that has little of either to spare.
 
 1. Branch from `main` — `fix/shuffle-preference`, `feat/recursive-folders`
 2. Keep it focused. One concern per PR.
-3. Confirm `./gradlew assembleDebug` and `./gradlew lint` pass — CI checks both
+3. Confirm `./gradlew assembleDebug assembleRelease test lint` all pass — CI checks all four
 4. Write a clear description: what changed, why, and what you tested it on
 5. Update `CHANGELOG.md` under `[Unreleased]`
 6. If you fixed something from `KNOWN_ISSUES.md`, remove that entry in the same PR

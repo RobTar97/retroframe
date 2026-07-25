@@ -1,0 +1,9 @@
+RetroFrame 0.2.0 - a rewrite for speed and reliability.
+
+Faster: the folder is read in one query instead of thousands of calls, and watched by the system instead of polled every 10 seconds. Photos decode to fit your screen.
+
+Fixed: a crash on Android 5.1. Shuffle now works, and off sorts naturally. Favouriting no longer jumps the slideshow.
+
+New: fade, slide and zoom transitions. A proper icon.
+
+Not yet tested on a physical tablet - reports very welcome.

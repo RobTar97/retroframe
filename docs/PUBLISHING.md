@@ -12,11 +12,14 @@ be fixed first.
 None of the channels below are reachable until these are done. All are tracked in
 [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 
-- [ ] Create `app/proguard-rules.pro` — `assembleRelease` currently **fails**
-- [ ] Create a signing keystore and wire up a release signing config
-- [ ] Adaptive launcher icon with proper density buckets
-- [ ] Remove the unused `READ_EXTERNAL_STORAGE` permission
-- [ ] Decide on a real `versionCode` / `versionName` scheme
+- [x] ~~Create `app/proguard-rules.pro`~~ — done in 0.2.0; release builds work and minify to ~3 MB
+- [x] ~~Adaptive launcher icon with density buckets~~ — done in 0.2.0
+- [x] ~~Remove the unused `READ_EXTERNAL_STORAGE` permission~~ — done in 0.2.0, along with
+      `INTERNET` and `ACCESS_NETWORK_STATE`
+- [x] ~~Raise `targetSdk` to the Play minimum~~ — now API 36
+- [ ] **Verify the 0.2.0 rewrite on real hardware.** Nothing should ship before this
+- [ ] Create a signing keystore and wire up `keystore.properties`
+- [ ] Decide on a `versionCode` / `versionName` scheme and bump from 0.2.0
 
 ### Signing
 
@@ -78,7 +81,7 @@ who run old hardware deliberately.
 
 **Already satisfied:**
 - ✅ GPL-3.0 — a recognised free software license
-- ✅ No proprietary dependencies (Glide, ExoPlayer, PhotoView, AndroidX are all FOSS)
+- ✅ No proprietary dependencies (Glide, Media3, PhotoView, AndroidX are all FOSS)
 - ✅ No Google Play Services, no Firebase
 - ✅ No analytics, no tracking, no network calls at all
 - ✅ Reproducible Gradle build from source
@@ -108,13 +111,12 @@ production access. Budget weeks, not days.
 
 **1. `SCHEDULE_EXACT_ALARMS` is a restricted permission.**
 Play limits it to apps whose *core* purpose is alarms, timers, or calendars. RetroFrame does
-have a genuine alarm-clock feature, so a declaration is defensible — but a reviewer looking
-at an app called "photo frame" may not agree.
+have a genuine alarm-clock feature, so a declaration is defensible.
 
-The strongest position is to narrow the surface: the **wake/sleep schedule does not need
-exact alarms**. Waking at 07:02 instead of 07:00 is irrelevant for a photo frame. Move that
-to `setWindow()` or `setInexactRepeating()`, and then the exact-alarm permission is
-justified solely by the alarm clock — a much cleaner story to defend.
+Version 0.2.0 already narrowed the surface as recommended: the wake/sleep schedule now uses
+inexact `setWindow` alarms, because waking at 07:02 instead of 07:00 is irrelevant for a photo
+frame. The exact-alarm permission is therefore justified **solely** by the morning alarm clock,
+which is a much cleaner story to defend in review.
 
 **2. `RECEIVE_BOOT_COMPLETED` + auto-launch on boot.**
 Legitimate for a kiosk-style app, but starting an activity from a boot receiver is
@@ -126,18 +128,20 @@ network access. Say it plainly in the listing — it is a real differentiator ag
 commercial photo-frame app, which invariably want an account.
 
 **4. `targetSdk` treadmill.**
-API 35 minimum today, API 36 from 31 August 2026, and a new bump every year thereafter.
-This is a permanent maintenance obligation. An app you wanted to write once and forget will
-need a compatibility pass annually just to remain listed. Weigh this honestly.
+The app targets API 36 today, which satisfies the requirement taking effect 31 August 2026 —
+so this is handled for now. But it is a permanent obligation: an app you wanted to write once
+and forget will need a compatibility pass every year just to remain listed. Weigh that
+honestly against F-Droid, which imposes no such treadmill.
 
-**5. Removing `READ_EXTERNAL_STORAGE`** avoids triggering the far stricter
-`MANAGE_EXTERNAL_STORAGE` review path. Do this before submitting.
+**5. Storage permissions.** Already resolved — the app declares none at all and reads
+everything through the Storage Access Framework, which avoids the far stricter
+`MANAGE_EXTERNAL_STORAGE` review path entirely.
 
 ### Verdict
 
-Worth doing if reach matters to you. Not worth doing first — get F-Droid and GitHub
-Releases working, gather device reports, fix the release blockers, then decide whether
-the annual `targetSdk` obligation is a trade you want.
+Worth doing if reach matters to you. Not worth doing first — get real-hardware testing done,
+publish on GitHub Releases, gather device reports, submit to F-Droid, and then decide whether
+the annual `targetSdk` obligation is a trade you want to sign up for.
 
 ---
 
@@ -193,10 +197,11 @@ cost real performance on the 1 GB tablets that are the actual point of the proje
 
 ## Recommended sequence
 
-1. Fix the release blockers in [KNOWN_ISSUES.md](KNOWN_ISSUES.md)
+1. **Test 0.2.0 on real tablets.** Everything else is blocked on this
 2. Generate and back up a signing keystore
-3. Tag `v0.1.0`, publish a signed APK on GitHub Releases
+3. Tag `v0.2.0`, publish a signed APK on GitHub Releases with its SHA-256
 4. Collect device reports — this is what the project most needs
-5. Submit to F-Droid
-6. Reach 1.0 once the blockers are cleared and real devices have been tested
-7. Reconsider Google Play, with the exact-alarm surface narrowed first
+5. Take screenshots on a real tablet for the store listings
+6. Submit to F-Droid
+7. Reach 1.0 once real devices have confirmed the rewrite
+8. Reconsider Google Play — the exact-alarm surface is already narrowed

@@ -1,5 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  Settings, favourites and the alarm are backed up.
+
+  The chosen folder URI is backed up too, but it is validated on startup: a restored SAF tree
+  URI carries no persisted permission grant on the new device. SlideshowViewModel checks
+  contentResolver.persistedUriPermissions before trusting it, and falls back to the folder
+  picker if the grant is gone — which also covers a revoked permission or an SD card that has
+  been removed.
+-->
 <full-backup-content>
-    <include domain="sharedpref" path="."/>
-    <exclude domain="sharedpref" path="device_specific_prefs.xml"/>
+    <include
+        domain="sharedpref"
+        path="." />
 </full-backup-content>

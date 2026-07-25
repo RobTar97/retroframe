@@ -1,85 +1,85 @@
 # Architecture
 
-How RetroFrame is put together, and why. This document describes **only what the code
-actually does today** — where a design is questionable, it says so and links to
-[KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+How RetroFrame is put together, and why. This describes **only what the code actually does**;
+where a design is still questionable it says so and links to [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 
 ## Design constraints
 
-Every decision follows from one premise: the target device is a 2013–2018 tablet with
-1 GB of RAM, a slow eMMC chip, a single- or dual-core CPU, and an Android version between
-5.1 and 9.
+Every decision follows from one premise: the target device is a 2013–2018 tablet with 1 GB of
+RAM, slow eMMC storage, a single- or dual-core CPU, and an Android version between 5.1 and 9.
 
-That rules out a great deal of modern Android practice:
+That rules out a lot of modern Android practice:
 
 | Not used | Why |
 |---|---|
 | Jetpack Compose | Startup cost and APK size; the Views version of this UI is trivial |
-| Hilt / Dagger | Reflection and codegen overhead for six classes that never change |
+| Hilt / Dagger | Reflection and codegen overhead for six objects that never change |
 | Room | There is no relational data — the folder *is* the database |
-| Multi-module Gradle | Build complexity with no payoff at 1,600 lines |
-| Coroutines Flow throughout | LiveData is lighter and adequate for this UI |
+| Multi-module Gradle | Build complexity with no payoff at ~2,000 lines |
+| WorkManager | Adds a database and a service for two alarms a day |
 
-The app also deliberately does **no** network I/O. It holds `INTERNET` and
-`ACCESS_NETWORK_STATE` permissions only as leftovers from a removed weather feature; see
-[KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+The app also does **no network I/O at all**, and the manifest enforces it: `INTERNET` is not
+declared, so the claim is checkable rather than a promise.
 
 ## Stack
 
-- **Kotlin** 1.9.20 · **AGP** 8.2.0 · **Gradle** 8.5 · JVM target 1.8
-- `minSdk 22` · `targetSdk 34` · `compileSdk 34`
-- Views + ViewBinding, MVVM-ish (ViewModel + LiveData)
-- **Glide** 4.16 — image loading and disk cache
+- **Kotlin** 2.0.21 · **AGP** 8.9.1 · **Gradle** 8.13 · JVM target 11
+- `minSdk 22` · `targetSdk 36` · `compileSdk 36`
+- Views + ViewBinding, MVVM (ViewModel + LiveData, coroutines for async work)
+- **Glide** 4.16 — image decode and disk cache
 - **PhotoView** 2.3 — pinch-to-zoom `ImageView`
-- **ExoPlayer** 2.19.1 — video playback (deprecated; Media3 migration is on the roadmap)
-- **ViewPager2** 1.0 — slideshow paging
+- **Media3** 1.4.1 — video playback
+- **ViewPager2** 1.1 — slideshow paging
+
+Release builds run R8 with resource shrinking: ~3 MB, which matters for install time and
+cold start on slow storage.
 
 ## Module layout
 
 ```
 app/src/main/java/com/rober/photoframe/
-├── PhotoframeApp.kt            Application — initialises the three preference singletons
-├── MainActivity.kt             Single activity; swaps fragments, owns immersive mode
+├── PhotoframeApp.kt            Application — initialises four singletons, nothing more
+├── MainActivity.kt             Single activity; owns immersive mode and screen-on policy
 │
 ├── model/
-│   └── MediaItem.kt            Data class + MediaType enum (IMAGE | VIDEO)
+│   └── MediaItem.kt            documentId, uri, name, type, dateModified, size
 │
 ├── data/
-│   ├── PhotoRepository.kt      Enumerates the SAF folder, filters, applies weighting
-│   ├── FavoritesManager.kt     Favourite URIs in SharedPreferences
-│   └── AlarmManager.kt         Alarm-clock model + persistence (NOT android.app.AlarmManager)
+│   ├── PhotoRepository.kt      Single-cursor SAF scan (see below)
+│   ├── PlaylistBuilder.kt      Pure: sorting, favourite weighting, interleaving
+│   ├── MediaTypes.kt           Pure: MIME/extension → MediaType
+│   ├── FavoritesManager.kt     Favourite document IDs, cached in memory
+│   └── AlarmSettings.kt        The user's morning alarm
 │
 ├── settings/
-│   ├── PhotoframePreferences.kt   All slideshow/schedule settings
+│   ├── PhotoframePreferences.kt   All settings; TimeOfDay and TransitionEffect live here
 │   └── SettingsDialogFragment.kt  The one settings screen
 │
 ├── ui/
-│   ├── SlideshowFragment.kt    Photo mode: paging, controls overlay, favourite button
-│   ├── SlideshowViewModel.kt   Advance timer, media list, playing state
-│   ├── SlideshowAdapter.kt     ViewHolder per page: Glide for stills, ExoPlayer for video
-│   └── ClockFragment.kt        Clock mode: fullscreen TextClock
+│   ├── SlideshowFragment.kt    Photo mode: paging, controls, favourites
+│   ├── SlideshowViewModel.kt   Library, playlist, advance timer
+│   ├── SlideshowAdapter.kt     One page per slide
+│   ├── SharedPlayer.kt         The single Media3 player
+│   ├── ImageLoader.kt          Glide config tuned to the display
+│   ├── SlideTransformers.kt    Fade / Slide / Zoom
+│   └── ClockFragment.kt        Clock mode
 │
 ├── util/
-│   ├── ScreenManager.kt        Wake/sleep exact alarms + the receiver that acts on them
-│   └── DirectoryWatcher.kt     Polls the folder for changes
+│   ├── ScreenManager.kt        Wake/sleep schedule + its receiver
+│   ├── FolderMonitor.kt        ContentObserver + fallback poll
+│   └── AlarmCompat.kt          Version-safe alarm scheduling
 │
 ├── alarm/
-│   ├── AlarmScheduler.kt       Schedules the morning alarm
-│   └── AlarmReceiver.kt        Fires the notification; also holds AlarmDismissReceiver
+│   ├── AlarmScheduler.kt       Morning alarm
+│   └── AlarmReceiver.kt        Notification; also holds AlarmDismissReceiver
 │
 └── boot/
-    └── BootReceiver.kt         Reschedules alarms and optionally auto-launches
+    └── BootReceiver.kt         Re-arms everything after a reboot
 ```
-
-> **Naming trap:** `data/AlarmManager.kt` is a RetroFrame object that stores the user's
-> alarm-clock setting. It is unrelated to `android.app.AlarmManager`, which is used in
-> `util/ScreenManager.kt` and `alarm/AlarmScheduler.kt`. Both appear in the same files.
-> This is a bad name and should be changed to `AlarmSettings`.
 
 ## The two modes
 
-RetroFrame is a single activity that swaps between two fragments. The distinction that
-matters is **who is allowed to turn the screen off**.
+One activity, two fragments. The distinction that matters is **who may turn the screen off**.
 
 ```
                         ┌──────────────────────────┐
@@ -91,125 +91,182 @@ matters is **who is allowed to turn the screen off**.
    ┌────────────────────────┐                    ┌────────────────────────┐
    │   SlideshowFragment    │                    │     ClockFragment      │
    │  PHOTO MODE            │                    │  CLOCK MODE            │
-   │                        │                    │                        │
    │  FLAG_KEEP_SCREEN_ON   │                    │  flag cleared →        │
    │  screen never sleeps   │                    │  device timeout applies│
    └────────────────────────┘                    └────────────────────────┘
 ```
 
-`MainActivity.enableKeepScreenOn()` / `disableKeepScreenOn()` are the whole mechanism.
-Mode is selected by a `"MODE"` string extra (`"PHOTO"` or `"CLOCK"`) on the launch intent,
-handled in both `onCreate()` and `onNewIntent()`.
+Mode is a `"MODE"` string extra on the launch intent, handled in `onCreate` and `onNewIntent`.
+`MainActivity.show()` refuses to replace a fragment with one of the same type, so a re-fired
+alarm does not tear down and rebuild a running slideshow.
+
+Immersive mode lives entirely in `applyImmersiveMode()` via `WindowInsetsControllerCompat`.
+There is deliberately no `android:windowFullscreen` in the theme: from API 35 the platform
+ignores it and enforces edge-to-edge, and two mechanisms that disagree on newer devices is
+worse than one.
 
 ## Media pipeline
 
+### Scanning: one query, not thousands
+
+This is the most important performance decision in the app.
+
+The obvious implementation is `DocumentFile.fromTreeUri(...).listFiles()`, which is what
+RetroFrame used to do. `listFiles()` runs one query to get child IDs and wraps each in a
+`DocumentFile`; every subsequent `name`, `lastModified()` or `isDirectory` read is *another*
+query across a Binder boundary. A 500-photo folder cost roughly 1,500 IPC round trips — and it
+ran on a 10-second timer.
+
+`PhotoRepository.scan()` asks for every column it needs in a single cursor query and reads
+them straight off the row:
+
 ```
-User picks folder
-   │  ActivityResultContracts.OpenDocumentTree
-   │  takePersistableUriPermission()  ← survives reboot
+DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, treeDocumentId)
+   │  projection: DOCUMENT_ID, DISPLAY_NAME, MIME_TYPE, LAST_MODIFIED, SIZE
    ▼
-PhotoframePreferences.galleryUriString
-   │
+one ContentResolver.query() for the entire folder
+   │  skip directories · MediaTypes.classify() · drop videos if disabled
    ▼
-PhotoRepository.loadMedia()                         [Dispatchers.IO]
-   │  DocumentFile.fromTreeUri(...).listFiles()
-   │  filter by extension → MediaType
-   │  drop videos if includeVideos == false
-   │  applyFavoriteWeighting()  ← duplicates favourites 3× then shuffles
-   ▼
-SlideshowViewModel._mediaItems  (LiveData)
-   │
-   ▼
-SlideshowAdapter.submitList()  → notifyDataSetChanged()
-   │
-   ├── MediaType.IMAGE → Glide → PhotoView
-   └── MediaType.VIDEO → ExoPlayer → PlayerView
+List<MediaItem>
 ```
 
-Subfolders are skipped — enumeration is one level deep only.
+One IPC round trip regardless of folder size.
 
-### Advance timing
+### Ordering
 
-Images and videos advance by different mechanisms, which is the subtlest part of the app:
+```
+library (unique)  ──►  PlaylistBuilder.build()  ──►  playlist (may repeat favourites)
+                            │
+                            ├── shuffle off → natural name sort, no weighting
+                            └── shuffle on  → weight favourites ×3, then interleave
+```
 
-- **Images** advance on a timer. `SlideshowViewModel.startSlideshow()` runs a coroutine that
-  delays for `slideIntervalSeconds` and then increments `_currentPosition`.
-- **Videos** do not use the timer at all. `onPageSelected` calls `stopSlideshow()` when the
-  new page is a video, and playback advances via the `onVideoEnded` callback when ExoPlayer
-  reaches `STATE_ENDED`. A video therefore plays to its natural end regardless of the
-  configured interval.
+Two rules worth knowing before changing this:
 
-Videos are also prepared with `playWhenReady = false` and only started once the page is
-actually visible, after a 100 ms settle delay (`SlideshowFragment.startVideoAtPosition`).
-Without this, audio from the next video begins before it is on screen.
+- **Weighting only applies when shuffling.** Duplicating entries inside a name-sorted list
+  would show the same photo three times consecutively, which is not what "show my favourites
+  more often" means.
+- **Interleaving is not a shuffle.** A plain shuffle of a weighted list sometimes puts two
+  copies of a photo back to back, which reads as the slideshow being stuck. `interleave()`
+  deals items into even slots then odd slots in descending weight order — provably free of
+  adjacent duplicates whenever no single item exceeds half the playlist.
 
-> There is a feedback path here worth understanding before editing:
-> `startSlideshow` → `_currentPosition` → LiveData observer → `viewPager.currentItem` →
-> `onPageSelected` → `updateCurrentPosition` → `startSlideshow(restart = true)`.
-> It terminates, but it restarts the timer coroutine on every page change.
+`PlaylistBuilder` and `MediaTypes` are pure and Android-free, and carry most of the test suite.
+
+### Rendering and advance timing
+
+```
+SlideshowAdapter ──┬── IMAGE → ImageLoader (Glide) → PhotoView
+                   └── VIDEO → SharedPlayer        → PlayerView
+```
+
+**One player, not one per page.** ViewPager2 keeps offscreen pages alive, so the old
+one-player-per-ViewHolder design could hold three decoder sessions at once. Old tablets
+typically have a single hardware decoder. `SharedPlayer` moves a single instance onto whichever
+page is active.
+
+**Images and videos advance differently:**
+
+- Images advance on a timer in the ViewModel.
+- Videos suspend the timer; `SharedPlayer` calls back on `STATE_ENDED`, so a clip always plays
+  to its natural end regardless of the configured interval. A playback *error* triggers the
+  same callback, so a codec the device lacks skips the video instead of stalling the frame.
+
+The ViewModel does **not** own the current position — the pager does. It emits
+`advanceRequests` ticks and the fragment moves the pager. The previous design had the
+ViewModel write a position, the fragment observe it and move the pager, and the pager report
+back, restarting the timer that had just fired — every automatic advance cancelled and
+recreated its own coroutine.
+
+### Image decoding
+
+`ImageLoader` sizes decodes to the actual display rather than a fixed 2048×2048 (four times
+more pixels than a 1280×800 panel can show), uses `RGB_565` on low-RAM devices to halve bitmap
+memory, and preloads the next photo so an advance does not stall on slow storage.
+
+## Watching the folder
+
+`FolderMonitor` registers a `ContentObserver` on the tree's children URI and does nothing until
+the provider reports a change, debounced by 2 seconds to collapse the burst you get when
+copying 200 photos at once.
+
+A 15-minute fallback poll remains, because old vendor document providers are not reliable about
+notifying. It compares a cheap `FolderSignature` (file count + sum of modification times)
+rather than building the full media list, and it is tied to the fragment's `onStart`/`onStop`,
+so nothing runs while the slideshow is off screen.
 
 ## Scheduling
 
-Three independent scheduled behaviours, all built on `android.app.AlarmManager` with
-`setExactAndAllowWhileIdle` and `RTC_WAKEUP`, all rescheduled 24 hours ahead each time they
-fire.
+Three scheduled behaviours, all re-armed 24 hours ahead when they fire, and all re-registered
+by `BootReceiver` because Android drops pending alarms on shutdown.
 
-| | Owner | Effect |
-|---|---|---|
-| **Wake** | `util/ScreenManager.kt` | Acquires a screen wake lock, launches in `PHOTO` mode |
-| **Sleep** | `util/ScreenManager.kt` | Launches in `CLOCK` mode; screen may then sleep |
-| **Alarm clock** | `alarm/AlarmScheduler.kt` | High-priority notification + system alarm sound |
+| | Owner | Exactness | Effect |
+|---|---|---|---|
+| **Wake** | `ScreenManager` | Inexact (±1 min) | Wake lock, launch in `PHOTO` mode |
+| **Sleep** | `ScreenManager` | Inexact (±1 min) | Launch in `CLOCK` mode; screen may sleep |
+| **Alarm clock** | `AlarmScheduler` | Exact if permitted | Full-screen notification + alarm sound |
 
-`BootReceiver` re-registers all of them after a reboot, because Android drops pending alarms
-on shutdown. This is why auto-start on boot matters for an unattended device.
+`AlarmCompat` picks the best API for the running device — `setExactAndAllowWhileIdle` on 23+,
+`setExact` on 19–22, `set` below. The old code called the API 23 method unconditionally with
+`minSdk 22`, which would have crashed on Android 5.1: the oldest version the app claims to
+support, and the hardest to test on.
 
-On API 31+ every path checks `canScheduleExactAlarms()` and **silently returns** if the
-permission is absent. The user gets no feedback that their schedule will not fire — a UX gap
-worth closing.
+Wake and sleep are deliberately inexact. A photo frame waking at 07:02 is indistinguishable to
+the user, it lets the system batch the wake-up, and it means only the alarm clock needs the
+`SCHEDULE_EXACT_ALARMS` justification. When exactness is unavailable the schedule still fires
+approximately — the previous version returned silently and simply never ran.
 
 ## Persistence
 
-Everything is SharedPreferences. There is no database and no file I/O outside SAF.
+SharedPreferences throughout. No database, no file I/O outside SAF.
 
 | File | Contents |
 |---|---|
-| `photoframe_prefs` | Interval, shuffle, videos, sound, gallery URI, wake/sleep, transition, clock style, auto-start |
-| `photoframe_favorites` | Favourite URIs, one `\|\|\|`-delimited string |
+| `photoframe_prefs` | Interval, shuffle, videos, sound, keep-screen-on, gallery URI, wake/sleep, transition, auto-start |
+| `photoframe_favorites` | Favourite document IDs as a `StringSet` |
 | `alarm_prefs` | Alarm hour, minute, enabled, label |
 
-`PhotoframePreferences` uses `.commit()` rather than `.apply()` throughout. This is
-intentional and should be preserved: a photo frame is a device that loses power abruptly,
-and an asynchronous write that has not reached disk is a setting the user has to enter
-again. `FavoritesManager` does not follow this rule, which is a bug.
+**Writes use `commit()`, not `apply()`.** This is deliberate and should be preserved: a photo
+frame loses power abruptly, and an asynchronous write that has not reached disk is a setting
+the user has to enter again. Lint's `ApplySharedPref` check is disabled in `build.gradle.kts`
+for this reason.
 
-All three are `object` singletons initialised from `PhotoframeApp.onCreate()`. They must be
-initialised before use, which is why `BootReceiver` calls `PhotoframePreferences.init()`
-defensively — broadcast receivers can run in a process where the Application has just been
-created.
+Favourites are keyed by SAF **document ID**, not full URI. Document IDs survive the folder
+being re-picked; URIs do not, so re-granting access to the same folder used to silently lose
+every favourite. A migration converts the old format on first run.
+
+The saved folder URI is validated against `contentResolver.persistedUriPermissions` on every
+load. A restored cloud backup, a revoked permission or a removed SD card all leave a URI that
+looks valid and is not; without the check the app sits on an empty screen insisting it has a
+folder.
 
 ## Extending it
 
 **Adding a setting**
-1. Key + accessor in `PhotoframePreferences` — use `.commit()`
+1. Key + accessor in `PhotoframePreferences` — use `commit()`
 2. Widget in `res/layout/dialog_settings.xml`
-3. Bind it in `SettingsDialogFragment.onViewCreated`, read in `loadSettings`, write in `saveSettings`
-4. Consume it somewhere — otherwise you have created another issue #12
+3. Bind in `SettingsDialogFragment`: field, `loadSettings`, `saveSettings`
+4. Consume it somewhere — an unread preference is how `transitionEffect` sat dead for a year
 
 **Adding a media type**
-Add the extension to `PhotoRepository.getMediaType()`, and if it needs different rendering,
-add a branch in `SlideshowAdapter.bind()`. Verify hardware decode exists on old devices
-before adding a video format.
+Add the extension to `MediaTypes`, and if it needs different rendering, branch in
+`SlideshowAdapter.bind()`. Check hardware decode exists on old devices before adding a video
+format.
 
 **Adding a scheduled behaviour**
-Follow `AlarmScheduler`: check `canScheduleExactAlarms()`, use a distinct
-`PendingIntent` request code, reschedule from within the receiver, and re-register in
-`BootReceiver`.
+Follow `AlarmScheduler`: schedule through `AlarmCompat`, use a distinct `PendingIntent` request
+code, re-arm inside the receiver, and register it in `BootReceiver`.
 
 ## Testing
 
-There is currently no test suite. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) #19.
+30 unit tests cover the pure logic: `MediaTypes` classification, `TimeOfDay` parsing and
+formatting, and `PlaylistBuilder` ordering, weighting and interleaving. Run with
+`./gradlew test`.
 
-Emulators are a poor proxy for this project. They do not reproduce slow eMMC, thermal
-throttling, aggressive manufacturer power management, or the storage-provider quirks of
-old vendor Android builds — which is where nearly all real bugs come from. Device reports
-from actual hardware are the most valuable contribution this project can receive.
+`PlaylistBuilderTest` needs Robolectric only because `MediaItem` holds an `android.net.Uri`,
+and pins `sdk = [34]` because Robolectric ships no shadows for API 36 yet.
+
+There is no UI or instrumentation coverage, and **none of this has run on a physical tablet** —
+see the first entry in [KNOWN_ISSUES.md](KNOWN_ISSUES.md). Emulators do not reproduce slow
+eMMC, thermal throttling, aggressive manufacturer power management, or the storage-provider
+quirks of old vendor Android builds, which is where nearly all real bugs come from.

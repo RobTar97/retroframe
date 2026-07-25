@@ -1,62 +1,56 @@
 package com.rober.photoframe.ui
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
+import com.rober.photoframe.MainActivity
 import com.rober.photoframe.R
 
-class ClockFragment : Fragment() {
+/**
+ * Fullscreen clock.
+ *
+ * This is what the sleep schedule switches to. The activity clears FLAG_KEEP_SCREEN_ON on
+ * the way in, so the device's own display timeout takes over and the screen actually turns
+ * off — which is the entire point of having a sleep time.
+ */
+class ClockFragment : Fragment(R.layout.fragment_clock) {
 
     private lateinit var btnBackToPhotos: Button
-    private val hideButtonHandler = Handler(Looper.getMainLooper())
-    private val hideButtonRunnable = Runnable { btnBackToPhotos.visibility = View.GONE }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_clock, container, false)
-    }
+    private val hideButton = Runnable { btnBackToPhotos.visibility = View.GONE }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         btnBackToPhotos = view.findViewById(R.id.btnBackToPhotos)
 
-        // Show button on tap anywhere
         view.setOnClickListener {
-            toggleButton()
+            if (btnBackToPhotos.visibility == View.VISIBLE) hide() else show()
         }
 
         btnBackToPhotos.setOnClickListener {
-            // Switch back to photo mode
-            (activity as? com.rober.photoframe.MainActivity)?.switchToPhotoMode()
+            (activity as? MainActivity)?.switchToPhotoMode()
         }
     }
 
-    private fun toggleButton() {
-        if (btnBackToPhotos.visibility == View.VISIBLE) {
-            btnBackToPhotos.visibility = View.GONE
-            hideButtonHandler.removeCallbacks(hideButtonRunnable)
-        } else {
-            showButton()
-        }
-    }
-
-    private fun showButton() {
+    private fun show() {
+        btnBackToPhotos.removeCallbacks(hideButton)
         btnBackToPhotos.visibility = View.VISIBLE
-        hideButtonHandler.removeCallbacks(hideButtonRunnable)
-        hideButtonHandler.postDelayed(hideButtonRunnable, 3000)
+        btnBackToPhotos.postDelayed(hideButton, BUTTON_TIMEOUT_MS)
+    }
+
+    private fun hide() {
+        btnBackToPhotos.removeCallbacks(hideButton)
+        btnBackToPhotos.visibility = View.GONE
     }
 
     override fun onDestroyView() {
+        btnBackToPhotos.removeCallbacks(hideButton)
         super.onDestroyView()
-        hideButtonHandler.removeCallbacks(hideButtonRunnable)
+    }
+
+    private companion object {
+        const val BUTTON_TIMEOUT_MS = 3_000L
     }
 }

@@ -2,30 +2,55 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!--
+      RetroFrame makes no network requests. INTERNET and ACCESS_NETWORK_STATE were declared
+      by an earlier version for a weather feature that was removed; they are deliberately
+      absent so the "this app cannot phone home" claim is enforced by the manifest and not
+      merely by the code.
+
+      READ_EXTERNAL_STORAGE is likewise absent. Media is read through the Storage Access
+      Framework, which grants access to exactly the one folder the user picks.
+    -->
+
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARMS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- This is a tablet-first app, but nothing requires a large screen. -->
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
 
     <application
         android:name=".PhotoframeApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Photoframe"
         tools:targetApi="31">
-        
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Photoframe.Fullscreen">
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Photoframe.Fullscreen"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|density">
+            <!--
+              configChanges: rotating a wall-mounted frame used to destroy and recreate the
+              activity, which rescanned the folder, rebuilt the playlist and lost the user's
+              place. The layout is a single full-bleed pager, so handling the change here
+              costs nothing and keeps the slideshow running.
+
+              showWhenLocked/turnScreenOn: the wake schedule needs to display over the lock
+              screen at 07:00, otherwise the user sees a lock screen instead of their photos.
+            -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -34,10 +59,14 @@
 
         <receiver
             android:name=".boot.BootReceiver"
+            android:directBootAware="false"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <!-- Non-standard, but several older vendor ROMs send this instead. -->
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
 
@@ -53,15 +82,17 @@
 
         <receiver
             android:name=".alarm.AlarmReceiver"
+            android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.rober.photoframe.ACTION_ALARM"/>
+                <action android:name="com.rober.photoframe.ACTION_ALARM" />
             </intent-filter>
         </receiver>
 
         <receiver
             android:name=".alarm.AlarmDismissReceiver"
-            android:exported="false"/>
+            android:enabled="true"
+            android:exported="false" />
 
     </application>
 

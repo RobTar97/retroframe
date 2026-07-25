@@ -1,8 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  Sized for old, low-resolution tablets: large text, generous touch targets, and a single
+  scrolling column so nothing depends on screen width.
+-->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/dialog_background">
+    android:background="@drawable/dialog_background"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,18 +17,31 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Slideshow Settings"
-            android:textSize="24sp"
-            android:textStyle="bold"
+            android:layout_marginBottom="20dp"
+            android:gravity="center_horizontal"
+            android:text="@string/settings_title"
             android:textColor="@android:color/black"
-            android:layout_marginBottom="24dp"
-            android:gravity="center_horizontal"/>
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <!-- Exact alarm warning, shown only when the system is withholding the permission -->
+        <TextView
+            android:id="@+id/exactAlarmWarning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="#FFF3CD"
+            android:padding="12dp"
+            android:text="@string/settings_exact_alarm_warning"
+            android:textColor="#664D03"
+            android:textSize="14sp"
+            android:visibility="gone" />
 
         <!-- Interval -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Slide Interval (seconds)"
+            android:text="@string/settings_interval"
             android:textColor="@android:color/darker_gray"
             android:textSize="14sp" />
 
@@ -32,176 +49,261 @@
             android:id="@+id/etInterval"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="10"
-            android:background="@drawable/edit_text_background"
-            android:padding="12dp"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp"
+            android:autofillHints="10"
+            android:background="@drawable/edit_text_background"
+            android:hint="10"
+            android:inputType="number"
+            android:minHeight="48dp"
+            android:padding="12dp"
+            android:textSize="16sp" />
 
-        <!-- Toggles -->
         <CheckBox
             android:id="@+id/cbShuffle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Shuffle Photos"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            android:minHeight="48dp"
+            android:text="@string/settings_shuffle"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/settings_shuffle_hint"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="13sp" />
 
         <CheckBox
             android:id="@+id/cbVideos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Include Videos"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            android:minHeight="48dp"
+            android:text="@string/settings_videos"
+            android:textSize="16sp" />
 
         <CheckBox
             android:id="@+id/cbVideoSound"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enable Video Sound"
-            android:textSize="16sp"
-            android:layout_marginBottom="16dp" />
+            android:minHeight="48dp"
+            android:text="@string/settings_video_sound"
+            android:textSize="16sp" />
+
+        <CheckBox
+            android:id="@+id/cbKeepScreenOn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:minHeight="48dp"
+            android:text="@string/settings_keep_screen_on"
+            android:textSize="16sp" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#E0E0E0"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp"
+            android:background="#E0E0E0" />
 
-        <!-- Wake/Sleep Schedule -->
+        <!-- Transition -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Schedule (HH:mm)"
-            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            android:text="@string/settings_transition"
+            android:textColor="@android:color/black"
             android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            android:textStyle="bold" />
 
-        <LinearLayout
+        <RadioGroup
+            android:id="@+id/rgTransition"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal">
 
-            <LinearLayout
+            <RadioButton
+                android:id="@+id/rbFade"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginEnd="8dp">
-                
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Wake Time"
-                    android:textSize="12sp"
-                    android:textColor="@android:color/darker_gray"/>
-                
-                <EditText
-                    android:id="@+id/etWakeTime"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="08:00"
-                    android:inputType="time"
-                    android:background="@drawable/edit_text_background"
-                    android:padding="12dp"
-                    android:layout_marginTop="4dp"/>
-            </LinearLayout>
+                android:minHeight="48dp"
+                android:text="@string/settings_transition_fade"
+                android:textSize="15sp" />
 
-            <LinearLayout
+            <RadioButton
+                android:id="@+id/rbSlide"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="8dp">
+                android:minHeight="48dp"
+                android:text="@string/settings_transition_slide"
+                android:textSize="15sp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Sleep Time"
-                    android:textSize="12sp"
-                    android:textColor="@android:color/darker_gray"/>
-
-                <EditText
-                    android:id="@+id/etSleepTime"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="22:00"
-                    android:inputType="time"
-                    android:background="@drawable/edit_text_background"
-                    android:padding="12dp"
-                    android:layout_marginTop="4dp"/>
-            </LinearLayout>
-        </LinearLayout>
+            <RadioButton
+                android:id="@+id/rbZoom"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="48dp"
+                android:text="@string/settings_transition_zoom"
+                android:textSize="15sp" />
+        </RadioGroup>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#E0E0E0"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp"
+            android:background="#E0E0E0" />
 
-        <!-- Morning Alarm -->
+        <!-- Schedule -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Morning Alarm"
-            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            android:text="@string/settings_schedule"
+            android:textColor="@android:color/black"
             android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_wake_time"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/etWakeTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="12dp"
+            android:autofillHints="07:00"
+            android:background="@drawable/edit_text_background"
+            android:hint="07:00"
+            android:inputType="datetime"
+            android:minHeight="48dp"
+            android:padding="12dp"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_sleep_time"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/etSleepTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:autofillHints="23:00"
+            android:background="@drawable/edit_text_background"
+            android:hint="23:00"
+            android:inputType="datetime"
+            android:minHeight="48dp"
+            android:padding="12dp"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/settings_schedule_hint"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="13sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="16dp"
+            android:background="#E0E0E0" />
+
+        <!-- Alarm -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/settings_alarm"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <CheckBox
             android:id="@+id/cbAlarmEnabled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enable Morning Alarm"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            android:minHeight="48dp"
+            android:text="@string/settings_alarm_enabled"
+            android:textSize="16sp" />
 
         <EditText
             android:id="@+id/etAlarmTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="07:00"
-            android:inputType="time"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:autofillHints="07:00"
             android:background="@drawable/edit_text_background"
+            android:hint="@string/settings_alarm_time"
+            android:inputType="datetime"
+            android:minHeight="48dp"
             android:padding="12dp"
-            android:layout_marginBottom="24dp"/>
+            android:textSize="16sp" />
 
-        <!-- Buttons -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="16dp"
+            android:background="#E0E0E0" />
+
+        <CheckBox
+            android:id="@+id/cbAutoStart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:minHeight="48dp"
+            android:text="@string/settings_auto_start"
+            android:textSize="16sp" />
+
         <Button
             android:id="@+id/btnChangeFolder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change Photo Folder"
-            android:backgroundTint="#2196F3"
-            android:textColor="@android:color/white"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp"
+            android:minHeight="56dp"
+            android:text="@string/settings_change_folder"
+            android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end">
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnCancel"
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Cancel"
-                android:textColor="@android:color/darker_gray"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:minHeight="56dp"
+                android:text="@string/cancel"
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnSave"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Save Settings"
-                android:backgroundTint="#4CAF50"
-                android:textColor="@android:color/white" />
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:minHeight="56dp"
+                android:text="@string/save"
+                android:textSize="16sp" />
         </LinearLayout>
 
     </LinearLayout>

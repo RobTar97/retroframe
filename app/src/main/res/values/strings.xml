@@ -1,3 +1,63 @@
 <resources>
     <string name="app_name">RetroFrame</string>
+
+    <!-- Empty states -->
+    <string name="empty_no_folder">No folder selected.\n\nTap Choose folder to pick where your photos live.</string>
+    <string name="empty_folder">No photos or videos found in this folder.\n\nTap Choose folder to pick a different one.</string>
+    <string name="select_folder">Choose folder</string>
+
+    <!-- Favourites -->
+    <string name="favorite_added">Added to favourites</string>
+    <string name="favorite_removed">Removed from favourites</string>
+
+    <!-- Errors -->
+    <string name="error_folder_permission">Could not keep access to that folder. Please try again.</string>
+    <string name="error_wake_time">Use HH:mm, for example 07:00</string>
+    <string name="error_sleep_time">Use HH:mm, for example 23:00</string>
+    <string name="error_alarm_time">Enter an alarm time as HH:mm</string>
+    <string name="error_open_settings">Could not open system settings on this device</string>
+
+    <!-- Alarm -->
+    <string name="alarm_channel_name">Alarm</string>
+    <string name="alarm_channel_description">Your daily morning alarm</string>
+    <string name="alarm_time_to_wake">Time to wake up</string>
+    <string name="dismiss">Dismiss</string>
+
+    <!-- Settings dialog -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_interval">Seconds per photo</string>
+    <string name="settings_shuffle">Shuffle order</string>
+    <string name="settings_shuffle_hint">Off sorts photos by name. Favourites only repeat when shuffle is on.</string>
+    <string name="settings_videos">Include videos</string>
+    <string name="settings_video_sound">Play video sound</string>
+    <string name="settings_keep_screen_on">Keep screen on during slideshow</string>
+    <string name="settings_transition">Transition</string>
+    <string name="settings_transition_fade">Fade</string>
+    <string name="settings_transition_slide">Slide</string>
+    <string name="settings_transition_zoom">Zoom</string>
+    <string name="settings_schedule">Daily schedule</string>
+    <string name="settings_wake_time">Wake time (HH:mm)</string>
+    <string name="settings_sleep_time">Sleep time (HH:mm)</string>
+    <string name="settings_schedule_hint">Leave blank to disable. At sleep time the clock is shown and the screen may turn off.</string>
+    <string name="settings_alarm">Morning alarm</string>
+    <string name="settings_alarm_enabled">Enable morning alarm</string>
+    <string name="settings_alarm_time">Alarm time (HH:mm)</string>
+    <string name="settings_auto_start">Start automatically after reboot</string>
+    <string name="settings_exact_alarm_warning">This device is not allowing exact alarms, so scheduled times may be up to a minute late. Tap to fix.</string>
+    <string name="settings_change_folder">Change folder</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Clock mode -->
+    <string name="back_to_photos">Back to photos</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_settings">Settings</string>
+    <string name="cd_clock_mode">Clock mode</string>
+    <string name="cd_previous">Previous photo</string>
+    <string name="cd_play_pause">Play or pause slideshow</string>
+    <string name="cd_next">Next photo</string>
+    <string name="cd_favorite">Mark as favourite</string>
+    <string name="cd_refresh">Reload folder</string>
+    <string name="cd_photo">Photo</string>
 </resources>

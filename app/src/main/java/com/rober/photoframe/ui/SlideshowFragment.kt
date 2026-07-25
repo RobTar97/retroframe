@@ -1,54 +1,65 @@
 package com.rober.photoframe.ui
 
-import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.media3.common.util.UnstableApi
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.rober.photoframe.MainActivity
 import com.rober.photoframe.R
+import com.rober.photoframe.model.MediaItem
 import com.rober.photoframe.settings.PhotoframePreferences
 import com.rober.photoframe.settings.SettingsDialogFragment
+import kotlinx.coroutines.launch
 
-class SlideshowFragment : Fragment() {
+@OptIn(UnstableApi::class)
+class SlideshowFragment : Fragment(R.layout.fragment_slideshow) {
 
     private val viewModel: SlideshowViewModel by viewModels()
+
     private lateinit var viewPager: ViewPager2
     private lateinit var adapter: SlideshowAdapter
-    private lateinit var controlsOverlay: LinearLayout
+    private lateinit var controlsOverlay: View
+    private lateinit var emptyState: TextView
     private lateinit var btnPlayPause: ImageButton
     private lateinit var btnFavorite: ImageButton
-    private var currentItemUri: String? = null
-    
-    private val hideControlsHandler = Handler(Looper.getMainLooper())
-    private val hideControlsRunnable = Runnable { controlsOverlay.visibility = View.GONE }
 
-    private val openDocumentTreeLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-        uri?.let {
-            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            requireContext().contentResolver.takePersistableUriPermission(it, takeFlags)
-            
-            PhotoframePreferences.galleryUriString = it.toString()
-            viewModel.refreshMedia()
+    private lateinit var player: SharedPlayer
+
+    private var currentItem: MediaItem? = null
+
+    private val hideControls = Runnable { setControlsVisible(false) }
+
+    private val folderPicker = registerForActivityResult(
+        ActivityResultContracts.OpenDocumentTree(),
+    ) { uri ->
+        uri ?: return@registerForActivityResult
+
+        val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        try {
+            requireContext().contentResolver.takePersistableUriPermission(uri, flags)
+        } catch (e: SecurityException) {
+            Toast.makeText(requireContext(), R.string.error_folder_permission, Toast.LENGTH_LONG)
+                .show()
+            return@registerForActivityResult
         }
-    }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_slideshow, container, false)
+        releasePreviousFolderPermission(uri.toString())
+        PhotoframePreferences.galleryUriString = uri.toString()
+        viewModel.onSettingsChanged(folderChanged = true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -56,243 +67,278 @@ class SlideshowFragment : Fragment() {
 
         viewPager = view.findViewById(R.id.viewPager)
         controlsOverlay = view.findViewById(R.id.controlsOverlay)
-        btnFavorite = view.findViewById(R.id.btnFavorite)
+        emptyState = view.findViewById(R.id.emptyState)
         btnPlayPause = view.findViewById(R.id.btnPlayPause)
-        
-        setupAdapter()
-        setupControls(view)
+        btnFavorite = view.findViewById(R.id.btnFavorite)
+
+        player = SharedPlayer(requireContext().applicationContext)
+        player.setOnVideoEnded { advance() }
+
+        setUpPager()
+        setUpControls(view)
         observeViewModel()
-        
-        // Initial check for gallery
+
         if (PhotoframePreferences.galleryUriString == null) {
-            openDocumentTreeLauncher.launch(null)
+            folderPicker.launch(null)
         }
     }
 
-    private fun setupAdapter() {
-        adapter = SlideshowAdapter(
-            requireContext(),
-            onVideoEnded = {
-                // On video ended, move to next
-                val current = viewPager.currentItem
-                val count = adapter.itemCount
-                if (count > 0) {
-                    viewPager.post {
-                        viewPager.currentItem = (current + 1) % count
-                    }
-                }
-            },
-            onItemClicked = {
-                toggleControls()
-            }
-        )
+    // ------------------------------------------------------------------ pager
+
+    private fun setUpPager() {
+        adapter = SlideshowAdapter(requireContext()) { toggleControls() }
+
         viewPager.adapter = adapter
+        viewPager.setPageTransformer(
+            SlideTransformers.forEffect(PhotoframePreferences.transitionEffect),
+        )
+
+        // One page either side is enough to make an advance feel instant, and is the most a
+        // 1 GB device should be asked to hold decoded.
+        viewPager.offscreenPageLimit = 1
+
+        // Disable the over-scroll glow: it allocates a bitmap and never looks right against
+        // a photo bleeding to the screen edge.
+        (viewPager.getChildAt(0) as? RecyclerView)?.overScrollMode = View.OVER_SCROLL_NEVER
+
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                
-                // Handle Slideshow Timer based on media type
-                val items = viewModel.mediaItems.value
-                val item = items?.getOrNull(position)
-                
-                // Update current item URI and favorite button state
-                currentItemUri = item?.uri?.toString()
-                updateFavoriteButton()
-                
-                if (item?.type == com.rober.photoframe.model.MediaType.VIDEO) {
-                    // Stop timer for video, let onVideoEnded handle it
-                    viewModel.stopSlideshow()
-                    
-                    // Start video playback NOW that it's visible
-                    startVideoAtPosition(position)
-                } else {
-                    // Start/Restart timer for images
-                    viewModel.startSlideshow(restart = true)
-                }
-                
-                // Update position in ViewModel
-                viewModel.updateCurrentPosition(position)
+                onSlideSelected(position)
             }
-            
+
             override fun onPageScrollStateChanged(state: Int) {
-                super.onPageScrollStateChanged(state)
-                // Pause all videos when user starts swiping
                 if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
-                    pauseAllVideos()
+                    // The user is taking over; stop any video mid-swipe.
+                    player.pause()
                 }
             }
         })
     }
 
-    private fun setupControls(view: View) {
-        // Toggle controls on tap
-        val gestureDetector = android.view.GestureDetector(requireContext(), object : android.view.GestureDetector.SimpleOnGestureListener() {
-            override fun onSingleTapConfirmed(e: android.view.MotionEvent): Boolean {
-                toggleControls()
-                return true
-            }
-        })
+    private fun onSlideSelected(position: Int) {
+        val item = adapter.itemAt(position)
+        currentItem = item
+        updateFavoriteIcon()
 
-        viewPager.getChildAt(0).setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-            false // Let ViewPager handle the touch for swiping
+        if (item == null) return
+
+        if (item.isVideo) {
+            startVideo(position)
+        } else {
+            player.detach()
+            preloadNeighbour(position)
         }
-        
+
+        viewModel.onSlideShown(item)
+    }
+
+    private fun startVideo(position: Int) {
+        // The ViewHolder may not exist yet if the page was just created; post so the pager
+        // has finished laying out.
+        viewPager.post {
+            if (!isAdded) return@post
+            val recycler = viewPager.getChildAt(0) as? RecyclerView ?: return@post
+            val holder = recycler.findViewHolderForAdapterPosition(position)
+                as? SlideshowAdapter.SlideViewHolder ?: return@post
+            val item = adapter.itemAt(position) ?: return@post
+            player.playOn(holder.playerView, item.uri)
+        }
+    }
+
+    /** Warms the cache for the next photo so the advance does not stall on slow storage. */
+    private fun preloadNeighbour(position: Int) {
+        val next = adapter.itemAt(position + 1) ?: adapter.itemAt(0) ?: return
+        if (!next.isVideo) {
+            ImageLoader.preload(requireContext(), next.uri)
+        }
+    }
+
+    private fun advance() {
+        val count = adapter.itemCount
+        if (count == 0) return
+        viewPager.currentItem = (viewPager.currentItem + 1) % count
+    }
+
+    // --------------------------------------------------------------- controls
+
+    private fun setUpControls(view: View) {
         view.findViewById<View>(R.id.topOverlay).setOnClickListener { toggleControls() }
-        
+
         view.findViewById<ImageButton>(R.id.btnSettings).setOnClickListener {
             showSettings()
-            showControls() // Keep controls visible
+            showControls()
         }
-        
+
         view.findViewById<ImageButton>(R.id.btnClock).setOnClickListener {
-            (activity as? com.rober.photoframe.MainActivity)?.switchToClockMode()
+            (activity as? MainActivity)?.switchToClockMode()
         }
-        
+
         view.findViewById<ImageButton>(R.id.btnPrev).setOnClickListener {
-            val current = viewPager.currentItem
-            if (current > 0) viewPager.currentItem = current - 1
-            showControls()
-        }
-        
-        view.findViewById<ImageButton>(R.id.btnNext).setOnClickListener {
-            val current = viewPager.currentItem
             val count = adapter.itemCount
-            if (count > 0) viewPager.currentItem = (current + 1) % count
+            if (count > 0) {
+                viewPager.currentItem = (viewPager.currentItem - 1 + count) % count
+                viewModel.resetTimer()
+            }
             showControls()
         }
-        
+
+        view.findViewById<ImageButton>(R.id.btnNext).setOnClickListener {
+            advance()
+            viewModel.resetTimer()
+            showControls()
+        }
+
         btnPlayPause.setOnClickListener {
-            viewModel.toggleSlideshow()
+            viewModel.togglePlayPause()
             showControls()
         }
-        
+
         btnFavorite.setOnClickListener {
             toggleFavorite()
             showControls()
         }
-        
+
         view.findViewById<ImageButton>(R.id.btnRefresh).setOnClickListener {
-            viewModel.refreshMedia()
+            viewModel.reload()
             showControls()
         }
-    }
 
-    private fun toggleControls() {
-        if (controlsOverlay.visibility == View.VISIBLE) {
-            controlsOverlay.visibility = View.GONE
-            hideControlsHandler.removeCallbacks(hideControlsRunnable)
-        } else {
-            showControls()
+        view.findViewById<View>(R.id.btnSelectFolder).setOnClickListener {
+            folderPicker.launch(null)
         }
     }
 
-    private fun showControls() {
-        controlsOverlay.visibility = View.VISIBLE
-        hideControlsHandler.removeCallbacks(hideControlsRunnable)
-        hideControlsHandler.postDelayed(hideControlsRunnable, 3000)
+    private fun toggleControls() = setControlsVisible(controlsOverlay.visibility != View.VISIBLE)
+
+    private fun showControls() = setControlsVisible(true)
+
+    private fun setControlsVisible(visible: Boolean) {
+        controlsOverlay.removeCallbacks(hideControls)
+        controlsOverlay.visibility = if (visible) View.VISIBLE else View.GONE
+        if (visible) {
+            controlsOverlay.postDelayed(hideControls, CONTROLS_TIMEOUT_MS)
+        }
     }
 
-    private fun observeViewModel() {
-        viewModel.mediaItems.observe(viewLifecycleOwner) { items ->
-            adapter.submitList(items)
-        }
+    private fun toggleFavorite() {
+        val item = currentItem ?: return
+        val nowFavorite = viewModel.toggleFavorite(item)
 
-        viewModel.currentPosition.observe(viewLifecycleOwner) { position ->
-            if (position < adapter.itemCount) {
-                viewPager.currentItem = position
+        btnFavorite.animate()
+            .scaleX(1.3f).scaleY(1.3f)
+            .setDuration(100)
+            .withEndAction {
+                btnFavorite.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
             }
-        }
+            .start()
 
-        viewModel.isSlideshowRunning.observe(viewLifecycleOwner) { isRunning ->
-            btnPlayPause.setImageResource(
-                if (isRunning) android.R.drawable.ic_media_pause 
-                else android.R.drawable.ic_media_play
-            )
-        }
+        updateFavoriteIcon()
+
+        Toast.makeText(
+            requireContext(),
+            if (nowFavorite) R.string.favorite_added else R.string.favorite_removed,
+            Toast.LENGTH_SHORT,
+        ).show()
+        // Deliberately no reload here — see SlideshowViewModel.toggleFavorite.
+    }
+
+    private fun updateFavoriteIcon() {
+        val item = currentItem
+        val favorite = item != null && viewModel.isFavorite(item)
+        btnFavorite.setImageResource(
+            if (favorite) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline,
+        )
     }
 
     private fun showSettings() {
-        val dialog = SettingsDialogFragment()
-        dialog.onSettingsChanged = {
-            viewModel.refreshMedia()
-            viewModel.startSlideshow() 
-        }
-        dialog.onChangeFolderRequested = {
-            openDocumentTreeLauncher.launch(null)
-        }
-        dialog.show(parentFragmentManager, "settings")
+        SettingsDialogFragment().apply {
+            onSettingsSaved = { viewModel.onSettingsChanged(folderChanged = false) }
+            onChangeFolderRequested = { folderPicker.launch(null) }
+        }.show(parentFragmentManager, "settings")
     }
-    
-    private fun toggleFavorite() {
-        val uri = currentItemUri ?: return
-        
-        val isFavorited = com.rober.photoframe.data.FavoritesManager.toggleFavorite(uri)
-        
-        // Animate the button
-        btnFavorite.animate()
-            .scaleX(1.3f)
-            .scaleY(1.3f)
-            .setDuration(100)
-            .withEndAction {
-                btnFavorite.animate()
-                    .scaleX(1.0f)
-                    .scaleY(1.0f)
-                    .setDuration(100)
-                    .start()
-            }
-            .start()
-        
-        // Update icon
-        updateFavoriteButton()
-        
-        // Show feedback
-        val message = if (isFavorited) "Added to favorites ❤️" else "Removed from favorites"
-        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
-        
-        // Reload media to apply new weighting
-        viewModel.refreshMedia()
-    }
-    
-    private fun updateFavoriteButton() {
-        val uri = currentItemUri ?: return
-        val isFavorited = com.rober.photoframe.data.FavoritesManager.isFavorite(uri)
-        
-        btnFavorite.setImageResource(
-            if (isFavorited) R.drawable.ic_heart_filled
-            else R.drawable.ic_heart_outline
-        )
-    }
-    
-    private fun startVideoAtPosition(position: Int) {
-        // Small delay to ensure ViewPager transition is complete
-        viewPager.postDelayed({
-            try {
-                val recyclerView = viewPager.getChildAt(0) as? androidx.recyclerview.widget.RecyclerView
-                val viewHolder = recyclerView?.findViewHolderForAdapterPosition(position) as? SlideshowAdapter.SlideshowViewHolder
-                viewHolder?.startPlayback()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }, 100)
-    }
-    
-    private fun pauseAllVideos() {
-        try {
-            val recyclerView = viewPager.getChildAt(0) as? androidx.recyclerview.widget.RecyclerView
-            for (i in 0 until (recyclerView?.childCount ?: 0)) {
-                val viewHolder = recyclerView?.getChildAt(i)?.let { 
-                    recyclerView.getChildViewHolder(it) as? SlideshowAdapter.SlideshowViewHolder
+
+    // ------------------------------------------------------------ view model
+
+    private fun observeViewModel() {
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is SlideshowState.Ready -> {
+                    emptyState.visibility = View.GONE
+                    viewPager.visibility = View.VISIBLE
+                    adapter.submitList(state.playlist)
+                    // A fresh playlist means position 0 is now a different photo.
+                    viewPager.setCurrentItem(0, false)
+                    onSlideSelected(0)
                 }
-                viewHolder?.pausePlayback()
+                SlideshowState.FolderEmpty -> showEmpty(R.string.empty_folder)
+                SlideshowState.NoFolderSelected -> showEmpty(R.string.empty_no_folder)
+                SlideshowState.Loading -> Unit
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        }
+
+        viewModel.isPlaying.observe(viewLifecycleOwner) { playing ->
+            btnPlayPause.setImageResource(
+                if (playing) android.R.drawable.ic_media_pause
+                else android.R.drawable.ic_media_play,
+            )
+            if (!playing) player.pause()
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.advanceRequests.collect { advance() }
+            }
         }
     }
 
+    private fun showEmpty(messageRes: Int) {
+        adapter.submitList(emptyList())
+        viewPager.visibility = View.GONE
+        emptyState.setText(messageRes)
+        emptyState.visibility = View.VISIBLE
+        showControls()
+    }
+
+    // ------------------------------------------------------------- lifecycle
+
+    override fun onStart() {
+        super.onStart()
+        // Watching the folder is pointless while the slideshow is off screen.
+        viewModel.startWatching()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.stopWatching()
+        player.pause()
+    }
+
     override fun onDestroyView() {
+        controlsOverlay.removeCallbacks(hideControls)
+        player.release()
+        viewPager.adapter = null
         super.onDestroyView()
-        hideControlsHandler.removeCallbacks(hideControlsRunnable)
+    }
+
+    /**
+     * SAF grants are a limited, persistent, per-app resource. Without releasing the old one,
+     * a user who re-picks their folder a few dozen times over the years eventually exhausts
+     * the quota and folder selection starts failing for no visible reason.
+     */
+    private fun releasePreviousFolderPermission(newUri: String) {
+        val previous = PhotoframePreferences.galleryUriString ?: return
+        if (previous == newUri) return
+        try {
+            requireContext().contentResolver.releasePersistableUriPermission(
+                android.net.Uri.parse(previous),
+                Intent.FLAG_GRANT_READ_URI_PERMISSION,
+            )
+        } catch (e: SecurityException) {
+            // Already gone; nothing to release.
+        }
+    }
+
+    private companion object {
+        const val CONTROLS_TIMEOUT_MS = 3_000L
     }
 }
