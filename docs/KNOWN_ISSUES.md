@@ -80,11 +80,16 @@ All strings are extracted to `strings.xml` and ready for translation, but no oth
 exists yet. `resourceConfigurations` is pinned to `en` to keep the APK small; that line needs
 updating when translations are added.
 
-### 7. No UI or instrumentation tests
+### 7. Thin UI test coverage
 
-The 30 unit tests cover the pure logic — media type classification, `HH:mm` parsing, playlist
-ordering and weighting. Nothing covers the fragments, the adapter, or the alarm receivers,
-all of which need a device or an emulator.
+30 unit tests cover the pure logic, and 14 instrumented tests now cover scheduling on the
+running API level, the manifest's permission and receiver guarantees, and clock mode. CI runs
+them on emulators at API 22, 28 and 36.
+
+Still uncovered: the slideshow fragment and the settings screen. Photo mode opens the system
+folder picker when no folder is granted, and a SAF grant cannot be scripted — the user
+confirming it in the picker is the security model — so testing it means either driving another
+app's UI or adding a test-only backdoor to production code.
 
 ---
 

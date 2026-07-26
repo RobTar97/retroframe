@@ -44,7 +44,8 @@ Not because they are bad ideas, but because they contradict what this project is
 
 - **Device reports.** Genuinely the scarce resource — see above
 - Fixes for anything in [KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)
-- Tests, especially UI and instrumentation coverage, which does not exist yet
+- Tests. 30 unit tests and 14 instrumented tests exist; slideshow and settings UI
+  coverage is still thin
 - Translations
 - Accessibility improvements
 - Anything that measurably reduces memory use, battery drain, or startup time
@@ -67,10 +68,14 @@ gitignored — never commit it.
 ./gradlew assembleRelease   # R8-minified release build (~3 MB, unsigned without a keystore)
 ./gradlew test              # 30 unit tests
 ./gradlew lint              # Android lint
+./gradlew ktlintCheck       # Kotlin style
+./gradlew connectedDebugAndroidTest   # 14 device tests, needs an emulator or tablet
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-CI runs all four on every pull request.
+CI runs all of these on every pull request, plus the device tests on emulators at
+API 22, 28 and 36 — API 22 being the one that catches calls to APIs that do not exist
+on the oldest version this app supports.
 
 Debug builds use the application ID `com.rober.photoframe.debug`, so a debug build and a
 release build can sit side by side on the same tablet.
