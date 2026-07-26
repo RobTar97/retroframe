@@ -15,12 +15,12 @@ import kotlin.random.Random
  * Robolectric is used only because [MediaItem] holds an android.net.Uri. The logic under
  * test is pure and SDK-independent.
  *
- * The SDK is pinned to 34 because Robolectric only ships shadows up to that level, while the
- * app targets 36. Leaving it unpinned makes the whole class fail to initialise with
- * "targetSdkVersion=36 > maxSdkVersion=34".
+ * The SDK is pinned to 35 rather than the app's target of 36 because Robolectric's SDK 36
+ * shadows require Java 21, and this project builds on Java 17. Raise it when the toolchain
+ * moves; nothing in these tests depends on the API level.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(manifest = Config.NONE, sdk = [34])
+@Config(manifest = Config.NONE, sdk = [35])
 class PlaylistBuilderTest {
 
     private fun item(name: String, id: String = name) = MediaItem(
