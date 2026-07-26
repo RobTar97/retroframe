@@ -39,6 +39,11 @@ updates:
         versions: [ ">=1.8.6" ]
       - dependency-name: "com.github.bumptech.glide:*"
         versions: [ ">=5.0.0" ]
+      # ktlint 14 adds wrapping rules that split single-parameter constructors and two-link
+      # call chains across lines. Adopting it means disabling rule after rule to protect a
+      # style that is deliberate — see the ktlint section of .editorconfig.
+      - dependency-name: "org.jlleitschuh.gradle.ktlint"
+        versions: [ ">=14.0.0" ]
       # Requires compileSdk 37.
       - dependency-name: "androidx.core:core-ktx"
         versions: [ ">=1.17.0" ]
