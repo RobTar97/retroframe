@@ -429,6 +429,25 @@ code { font-family: var(--mono); font-size: .92em; color: var(--ember-hot); }
 .copy:active { transform: scale(.94); }
 .copy.is-done { color: var(--sage); border-color: var(--sage); }
 
+.step__warn {
+  margin-top: .8rem !important;
+  padding: .8rem 1rem;
+  border-left: 2px solid var(--ember);
+  background: rgba(255, 183, 77, .07);
+  border-radius: 0 8px 8px 0;
+  font-size: .92rem;
+}
+
+.guides {
+  margin: 0 0 2.5rem;
+  padding: 1.1rem 1.3rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: linear-gradient(168deg, var(--dusk), var(--ink-2));
+}
+.guides p { margin: 0; font-size: .95rem; }
+.guides__sep { color: var(--bone-dim); margin: 0 .6rem; }
+
 .tips {
   border-top: 1px solid var(--line);
   padding-top: 1.8rem;

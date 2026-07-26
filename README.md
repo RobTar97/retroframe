@@ -145,15 +145,24 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ## Setting it up
 
-1. **Put your photos on the tablet.** An SD card is ideal — it keeps them off the small
-   internal storage and lets you swap the card to change the collection.
-2. **Launch RetroFrame.** It opens the system folder picker on first run. Pick your folder;
-   the app keeps access to that one folder only.
-3. **Tap the screen** to reveal the controls, then the gear to open settings.
-4. **Set the interval** — 30 to 60 seconds is comfortable for a frame you live with.
-5. **Set wake and sleep times** as 24-hour `HH:mm`. Leave blank to disable.
-6. **Enable auto-start on boot** so a power cut doesn't leave a blank screen.
-7. **Plug it in and leave it.**
+**New to this? → [Getting started](docs/GETTING_STARTED.md)** walks through it with no
+assumed knowledge. **Not sure which tablet? → [Choosing a tablet](docs/CHOOSING_A_TABLET.md).**
+
+The short version:
+
+1. **Copy your photos into `Pictures`** on the tablet — over a USB cable (choose *File
+   transfer* on the tablet, not just charging), or on an SD card. A dedicated subfolder like
+   `Pictures/Frame` keeps things tidy.
+2. **Install the APK** from [the latest release](https://github.com/RobTar97/retroframe/releases/latest)
+   and allow installation from unknown sources when asked.
+3. **Open RetroFrame.** It explains what happens next, then opens Android's folder browser
+   already inside `Pictures`. Open your folder, tap **Use this folder**, then **Allow**.
+4. **Tap the screen → ⚙** and set the interval, plus wake and sleep times in 24-hour `HH:mm`.
+   Turn on auto-start so a power cut doesn't leave a black screen.
+
+> **If Android says "Can't use this folder"** you've selected the top level of storage or the
+> Downloads folder. Android blocks both for every app. Open a folder inside, or move the
+> photos into `Pictures`. Verified: root ❌, `Download` ❌, `Pictures` ✅, `DCIM` ✅.
 
 ### Physical setup tips
 
@@ -260,6 +269,16 @@ thing you can do for the project** — more useful than code.
   point of the project.
 - Any form of telemetry, even opt-in.
 - An iOS version — [reasoning](docs/PUBLISHING.md#what-about-ios).
+
+## Documentation
+
+| | |
+|---|---|
+| [Getting started](docs/GETTING_STARTED.md) | Setup for everyone — a simple path and a technical one |
+| [Choosing a tablet](docs/CHOOSING_A_TABLET.md) | Which old devices work, and how to check yours |
+| [Architecture](docs/ARCHITECTURE.md) | How the code works and why |
+| [Known issues](docs/KNOWN_ISSUES.md) | Every current defect, written down |
+| [Publishing](docs/PUBLISHING.md) | Distribution channels and their tradeoffs |
 
 ## Contributing
 
