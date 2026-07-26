@@ -14,6 +14,8 @@ Point it at a folder. It shows your photos. That's the whole app.
 [![Kotlin](https://img.shields.io/badge/kotlin-2.0.21-7F52FF.svg)](https://kotlinlang.org)
 [![No tracking](https://img.shields.io/badge/tracking-none-success.svg)](#privacy)
 
+**[retroframe website →](https://robtar97.github.io/retroframe/)**  ·  **[Download v0.2.0 (3.1 MB) →](https://github.com/RobTar97/retroframe/releases/latest)**
+
 </div>
 
 ---
@@ -100,10 +102,21 @@ demanding access to all your files.
 
 ## Install
 
+### Download a build
+
+Grab the signed APK from the [latest release](https://github.com/RobTar97/retroframe/releases/latest),
+copy it to your tablet and open it. You will need to allow installation from unknown sources.
+
+Verify it first if you like — every release lists the APK's SHA-256:
+
+```bash
+sha256sum retroframe-v0.2.0.apk
+```
+
 ### Build it yourself
 
-The only currently supported route. You need [Android Studio](https://developer.android.com/studio),
-or JDK 17 plus the Android SDK.
+You need [Android Studio](https://developer.android.com/studio), or JDK 17 plus the
+Android SDK.
 
 ```bash
 git clone https://github.com/RobTar97/retroframe.git
@@ -112,14 +125,11 @@ cd retroframe
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Or copy the APK to the tablet and open it — you will need to allow installation from unknown
-sources.
-
 ### Distribution channels
 
 | Channel | Status |
 |---|---|
-| GitHub Releases | Planned once the rewrite is verified on real hardware |
+| [GitHub Releases](https://github.com/RobTar97/retroframe/releases) | **Available now** — signed APK with a published checksum |
 | F-Droid | Planned. GPL-3.0, no proprietary dependencies, no Play Services — a good fit |
 | Google Play | Under consideration — [tradeoffs here](docs/PUBLISHING.md) |
 | Apple App Store | Not planned. [Why not](docs/PUBLISHING.md#what-about-ios) |
@@ -203,7 +213,7 @@ Full write-up in **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
 
 ## Project status
 
-**Version 0.2.0 — works, but unproven on real hardware.**
+**Version 0.2.0 — [released](https://github.com/RobTar97/retroframe/releases/latest), but unproven on real hardware.**
 
 The app builds cleanly, R8-minifies to ~3 MB, passes 30 unit tests and passes lint. Version
 0.2.0 was a substantial rewrite that fixed a long list of real defects — including a crash on
@@ -222,11 +232,12 @@ thing you can do for the project** — more useful than code.
 ## Roadmap
 
 **Towards 1.0**
+- [x] ~~Signed release and a first GitHub Release~~
 - [ ] Verify the rewrite on real hardware across several Android versions
 - [ ] Recursive subfolder scanning
 - [ ] Loading indicator while a large folder is scanned
 - [ ] Video poster frames instead of a flash of black
-- [ ] Signed release and a first GitHub Release
+- [ ] Screenshots taken on a real tablet
 - [ ] F-Droid submission
 
 **Later**

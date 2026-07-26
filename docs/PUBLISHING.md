@@ -18,7 +18,7 @@ None of the channels below are reachable until these are done. All are tracked i
       `INTERNET` and `ACCESS_NETWORK_STATE`
 - [x] ~~Raise `targetSdk` to the Play minimum~~ — now API 36
 - [ ] **Verify the 0.2.0 rewrite on real hardware.** Nothing should ship before this
-- [ ] Create a signing keystore and wire up `keystore.properties`
+- [x] ~~Create a signing keystore and wire up `keystore.properties`~~ — done; keep `retroframe-release.jks` backed up off this machine
 - [ ] Decide on a `versionCode` / `versionName` scheme and bump from 0.2.0
 
 ### Signing
@@ -60,12 +60,12 @@ Back the keystore up somewhere that is not the same machine.
 
 ---
 
-## GitHub Releases — do this first
+## GitHub Releases — done
 
-The lowest-friction channel and the right place to start. No fees, no review, no policy.
+**[v0.2.0 is published](https://github.com/RobTar97/retroframe/releases/tag/v0.2.0)** with a
+signed APK and its SHA-256.
 
-Attach a signed APK to a tagged release. Include the SHA-256 checksum so people can verify
-what they are sideloading.
+The lowest-friction channel and the right place to start: no fees, no review, no policy.
 
 This also matters for the target audience specifically: **users on Android 5.1–7 are poorly
 served by the Play Store**, which increasingly fails to deliver to old devices. A directly
