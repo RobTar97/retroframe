@@ -2,6 +2,7 @@ package com.rober.photoframe.settings
 
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -95,7 +96,7 @@ class SettingsDialogFragment : DialogFragment() {
     }
 
     private fun loadSettings() {
-        etInterval.setText(PhotoframePreferences.slideIntervalSeconds.toString())
+        etInterval.setText(PhotoframePreferences.slideIntervalSeconds.toString(), TextView.BufferType.EDITABLE)
         cbShuffle.isChecked = PhotoframePreferences.shuffle
         cbVideos.isChecked = PhotoframePreferences.includeVideos
         cbVideoSound.isChecked = PhotoframePreferences.videoSoundEnabled
@@ -192,6 +193,10 @@ class SettingsDialogFragment : DialogFragment() {
      * may land at 07:01 — and how to fix it.
      */
     private fun showExactAlarmWarningIfNeeded() {
+        // onResume can fire while the view is gone (returning from the system settings
+        // screen as the dialog is being dismissed), and the fields are lateinit.
+        if (view == null || !isAdded) return
+
         val needed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             !ScreenManager.canScheduleExact(requireContext())
 
@@ -203,7 +208,7 @@ class SettingsDialogFragment : DialogFragment() {
             try {
                 startActivity(
                     Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                        .setData(Uri.parse("package:${requireContext().packageName}")),
+                        .setData("package:${requireContext().packageName}".toUri()),
                 )
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), R.string.error_open_settings, Toast.LENGTH_LONG)

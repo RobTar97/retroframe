@@ -1,5 +1,7 @@
 package com.rober.photoframe.ui
 
+import androidx.core.net.toUri
+
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -408,7 +410,7 @@ class SlideshowFragment :
         if (previous == newUri) return
         try {
             requireContext().contentResolver.releasePersistableUriPermission(
-                android.net.Uri.parse(previous),
+                previous.toUri(),
                 Intent.FLAG_GRANT_READ_URI_PERMISSION,
             )
         } catch (e: SecurityException) {

@@ -108,6 +108,11 @@ android {
             // loses power abruptly, and an async write that has not reached disk is a
             // setting the user has to enter again. See PhotoframePreferences.
             "ApplySharedPref",
+            // Same reason. The KTX SharedPreferences.edit {} helper defaults to apply(),
+            // so adopting it would either silently change that behaviour or require
+            // edit(commit = true) at every call site. The explicit .commit() is clearer
+            // about the one property that matters here.
+            "UseKtx",
         )
     }
 }

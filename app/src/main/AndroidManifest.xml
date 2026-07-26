@@ -12,9 +12,28 @@
       Framework, which grants access to exactly the one folder the user picks.
     -->
 
+    <!--
+      Media3 injects ACCESS_NETWORK_STATE into the merged manifest for adaptive streaming.
+      RetroFrame only ever plays local files, so it is stripped back out. It grants no
+      ability to open a socket on its own — INTERNET does that, and is absent — but leaving
+      it in would put a network permission in the installed app and make the project's
+      "no network access" claim untrue on inspection. Verified with:
+          adb shell dumpsys package com.rober.photoframe
+    -->
+    <uses-permission
+        android:name="android.permission.ACCESS_NETWORK_STATE"
+        tools:node="remove" />
+
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARMS" />
+    <!--
+      SCHEDULE_EXACT_ALARM, singular. This was declared as SCHEDULE_EXACT_ALARMS for a long
+      time, which is not a permission that exists — so the system never offered it and the
+      morning alarm silently ran on inexact timing on every device. Only the alarm clock
+      needs this; the wake/sleep schedule deliberately uses inexact alarms so the tablet can
+      stay asleep. Android 12 (API 31) and up only.
+    -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- This is a tablet-first app, but nothing requires a large screen. -->

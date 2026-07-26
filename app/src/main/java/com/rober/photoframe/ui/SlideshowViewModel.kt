@@ -2,6 +2,7 @@ package com.rober.photoframe.ui
 
 import android.app.Application
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -84,7 +85,7 @@ class SlideshowViewModel(application: Application) : AndroidViewModel(applicatio
                 return@launch
             }
 
-            val treeUri = Uri.parse(uriString)
+            val treeUri = uriString.toUri()
 
             // The saved URI can outlive the grant that made it usable: a cloud restore onto
             // a new device, a permission revoked in system settings, or an SD card pulled
@@ -135,7 +136,7 @@ class SlideshowViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun startWatching() {
         val uriString = PhotoframePreferences.galleryUriString ?: return
-        folderMonitor.start(Uri.parse(uriString), viewModelScope)
+        folderMonitor.start(uriString.toUri(), viewModelScope)
     }
 
     fun stopWatching() = folderMonitor.stop()

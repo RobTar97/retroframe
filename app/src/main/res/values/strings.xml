@@ -32,6 +32,9 @@
     <!-- Settings dialog -->
     <string name="settings_title">Settings</string>
     <string name="settings_interval">Seconds per photo</string>
+    <string name="hint_interval">10</string>
+    <string name="hint_wake">07:00</string>
+    <string name="hint_sleep">23:00</string>
     <string name="settings_shuffle">Shuffle order</string>
     <string name="settings_shuffle_hint">Off sorts photos by name. Favourites only repeat when shuffle is on.</string>
     <string name="settings_videos">Include videos</string>

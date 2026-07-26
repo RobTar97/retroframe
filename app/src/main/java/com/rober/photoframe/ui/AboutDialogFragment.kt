@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.net.Uri
+import androidx.core.net.toUri
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -60,7 +61,7 @@ class AboutDialogFragment : DialogFragment() {
      */
     private fun open(url: String) {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
         } catch (e: ActivityNotFoundException) {
             // A stripped-down tablet may genuinely have no browser. The URLs are also
             // printed in the dialog, so there is still a way to reach them.

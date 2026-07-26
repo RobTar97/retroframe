@@ -1,18 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   Sized for old, low-resolution tablets: large text, generous touch targets, and a single
   scrolling column so nothing depends on screen width.
+
+  Save and Cancel live OUTSIDE the ScrollView. The settings list is taller than an 800px
+  landscape tablet, so when they scrolled with the content they sat below the fold and a
+  user could reasonably conclude there was no way to save.
 -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/dialog_background"
-    android:fillViewport="true">
+    android:orientation="vertical">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
 
         <TextView
             android:layout_width="match_parent"
@@ -51,9 +61,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
-            android:autofillHints="10"
+            android:autofillHints="@string/hint_interval"
             android:background="@drawable/edit_text_background"
-            android:hint="10"
+            android:hint="@string/hint_interval"
             android:inputType="number"
             android:minHeight="48dp"
             android:padding="12dp"
@@ -181,9 +191,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="12dp"
-            android:autofillHints="07:00"
+            android:autofillHints="@string/hint_wake"
             android:background="@drawable/edit_text_background"
-            android:hint="07:00"
+            android:hint="@string/hint_wake"
             android:inputType="datetime"
             android:minHeight="48dp"
             android:padding="12dp"
@@ -202,9 +212,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:autofillHints="23:00"
+            android:autofillHints="@string/hint_sleep"
             android:background="@drawable/edit_text_background"
-            android:hint="23:00"
+            android:hint="@string/hint_sleep"
             android:inputType="datetime"
             android:minHeight="48dp"
             android:padding="12dp"
@@ -248,7 +258,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
-            android:autofillHints="07:00"
+            android:autofillHints="@string/hint_wake"
             android:background="@drawable/edit_text_background"
             android:hint="@string/settings_alarm_time"
             android:inputType="datetime"
@@ -289,31 +299,42 @@
             android:text="@string/settings_about"
             android:textSize="16sp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btnCancel"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:minHeight="56dp"
-                android:text="@string/cancel"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/btnSave"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:minHeight="56dp"
-                android:text="@string/save"
-                android:textSize="16sp" />
-        </LinearLayout>
 
     </LinearLayout>
-</ScrollView>
+    </ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="16dp">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:minHeight="56dp"
+            android:text="@string/cancel"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:minHeight="56dp"
+            android:text="@string/save"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</LinearLayout>

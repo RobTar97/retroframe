@@ -15,11 +15,13 @@ import android.util.Log
  *
  * This picks the best available API for the running device:
  *
- * | API      | Method                        | Doze-proof |
- * |----------|-------------------------------|------------|
- * | 23+      | setExactAndAllowWhileIdle     | yes        |
- * | 19–22    | setExact                      | n/a (no Doze) |
- * | below 19 | set                           | n/a        |
+ * | API   | Method                    | Doze-proof         |
+ * |-------|---------------------------|--------------------|
+ * | 23+   | setExactAndAllowWhileIdle | yes                |
+ * | 22    | setExact                  | n/a — no Doze yet  |
+ *
+ * There is no branch below API 22 because that is the app's minimum. Doze arrived with
+ * API 23, so on 22 there is nothing for an alarm to be held back by in the first place.
  */
 object AlarmCompat {
 
@@ -48,15 +50,14 @@ object AlarmCompat {
                         pendingIntent,
                     )
 
-                exactPermitted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ->
+                // API 22 only. setExactAndAllowWhileIdle does not exist here, which is the
+                // crash this class was written to prevent.
+                exactPermitted ->
                     alarmManager.setExact(
                         AlarmManager.RTC_WAKEUP,
                         triggerAtMillis,
                         pendingIntent,
                     )
-
-                exactPermitted ->
-                    alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
 
                 allowInexact ->
                     alarmManager.setWindow(
