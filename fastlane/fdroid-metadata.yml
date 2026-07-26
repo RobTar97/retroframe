@@ -1,0 +1,72 @@
+# F-Droid build recipe for RetroFrame
+#
+# This is NOT read by this repository. It is the file that has to be contributed to
+# https://gitlab.com/fdroid/fdroiddata as metadata/com.rober.photoframe.yml
+#
+# It lives here so it is version-controlled alongside the app and stays in step with
+# build.gradle.kts. Submitting it needs a GitLab account, so that step is a handoff —
+# see docs/PUBLISHING.md.
+#
+# Before submitting:
+#   1. Tag a release (the release workflow publishes it).
+#   2. Set CurrentVersion / CurrentVersionCode below to match that tag.
+#   3. Add the tag's commit to Builds[].
+#   4. Run `fdroid lint com.rober.photoframe` and `fdroid build com.rober.photoframe`
+#      from a fdroiddata checkout.
+#
+# F-Droid builds from source on its own infrastructure and signs with its own key, so
+# none of this project's signing secrets are involved.
+
+Categories:
+  - Multimedia
+  - Graphics
+License: GPL-3.0-or-later
+AuthorName: RetroFrame contributors
+SourceCode: https://github.com/RobTar97/retroframe
+IssueTracker: https://github.com/RobTar97/retroframe/issues
+Changelog: https://github.com/RobTar97/retroframe/blob/main/CHANGELOG.md
+WebSite: https://robtar97.github.io/retroframe/
+
+AutoName: RetroFrame
+Description: |-
+    Turn an old Android tablet into a digital photo frame.
+
+    RetroFrame shows a fullscreen slideshow from one folder on the device. It is built
+    specifically for old hardware — it runs on Android 5.1 and up, and is designed for
+    tablets with 1 GB of RAM and slow storage, the kind that modern apps have stopped
+    supporting.
+
+    It works entirely offline. The app does not declare the INTERNET permission, so it
+    cannot reach a network at all. There is no account, no cloud service, no subscription
+    and no advertising, and your photos never leave the device.
+
+    Features:
+
+    * Slideshow from any folder you choose, including SD cards
+    * Photos (JPEG, PNG, GIF, WebP, HEIC) and video (MP4, MKV, WebM, MOV, 3GP)
+    * Fade, slide and zoom transitions, with an adjustable interval
+    * Favourites, which come around roughly three times as often
+    * A fullscreen clock mode
+    * Daily wake and sleep times, so the screen is not lit all night
+    * An optional morning alarm
+    * Starts itself again after a power cut
+
+    Permissions used: start on boot, keep the screen awake, schedule the alarm, and post
+    the alarm notification. That is the complete list. Photos are read through the Storage
+    Access Framework, which grants access to exactly the one folder you pick.
+
+RepoType: git
+Repo: https://github.com/RobTar97/retroframe.git
+
+Builds:
+  - versionName: 0.2.0
+    versionCode: 1
+    commit: v0.2.0
+    subdir: app
+    gradle:
+      - yes
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 0.2.0
+CurrentVersionCode: 1

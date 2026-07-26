@@ -1,0 +1,52 @@
+# Accumulates merged pull requests into a draft release, so CHANGELOG.md has a starting
+# point rather than being reconstructed from git log at tag time.
+#
+# The draft is a first draft, not the finished thing. Release notes on this project explain
+# why a change matters, which no amount of PR-title collation can do for you.
+
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+
+categories:
+  - title: 'Fixed'
+    labels: [ 'bug' ]
+  - title: 'Added'
+    labels: [ 'enhancement' ]
+  - title: 'Performance'
+    labels: [ 'performance' ]
+  - title: 'Device reports acted on'
+    labels: [ 'device-report', 'hardware-specific' ]
+  - title: 'Documentation'
+    labels: [ 'documentation' ]
+  - title: 'Dependencies and build'
+    labels: [ 'dependencies', 'ci' ]
+    collapse-after: 5
+
+change-template: '- $TITLE (#$NUMBER)'
+change-title-escapes: '\<*_&'
+
+# minSdk 22 is the premise of the project, so anything that raises the floor is a major
+# change, not a feature.
+version-resolver:
+  major:
+    labels: [ 'breaking' ]
+  minor:
+    labels: [ 'enhancement' ]
+  patch:
+    labels: [ 'bug', 'dependencies', 'ci', 'documentation' ]
+  default: patch
+
+exclude-labels:
+  - 'skip-changelog'
+
+template: |
+  $CHANGES
+
+  ---
+
+  **Before publishing:** rewrite the above into prose explaining *why* these changes matter,
+  bump `versionCode` in `app/build.gradle.kts`, add
+  `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`, and move the notes into
+  `CHANGELOG.md` — the release workflow reads that file, not this draft.
+
+  Full diff: https://github.com/RobTar97/retroframe/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION

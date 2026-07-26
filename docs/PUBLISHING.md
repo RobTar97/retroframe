@@ -114,11 +114,20 @@ who run old hardware deliberately.
 - ✅ No analytics, no tracking, no network calls at all
 - ✅ Reproducible Gradle build from source
 
-**Still needed:**
-- Fastlane metadata — **already scaffolded** in `fastlane/metadata/android/en-US/`
-- Screenshots in `fastlane/metadata/android/en-US/phoneScreenshots/`
-- A tagged release for F-Droid's build server to track
-- A merge request against [fdroiddata](https://gitlab.com/fdroid/fdroiddata)
+**Already prepared:**
+- Fastlane metadata in `fastlane/metadata/android/en-US/` — title, descriptions, changelog
+- Screenshots in `images/tenInchScreenshots/` and `sevenInchScreenshots/`, plus icon and
+  feature graphic
+- The build recipe itself, in **`fastlane/fdroid-metadata.yml`**. That file is not read by
+  this repository; it is what gets contributed as `metadata/com.rober.photoframe.yml`. It
+  lives here so it stays in step with `build.gradle.kts` instead of drifting.
+- `v0.2.0` is tagged and published for F-Droid's build server to track
+
+**The handoff:** submitting the merge request to
+[fdroiddata](https://gitlab.com/fdroid/fdroiddata) needs a GitLab account, so that step is
+yours. Before submitting, run `fdroid lint com.rober.photoframe` and
+`fdroid build com.rober.photoframe` from an fdroiddata checkout to confirm it builds on their
+infrastructure.
 
 **Tradeoffs:** F-Droid builds everything from source on their own infrastructure and signs
 with their key, so inclusion takes time (weeks) and updates lag your tags by days. In
