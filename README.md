@@ -11,6 +11,7 @@ Point it at a folder. It shows your photos. That's the whole app.
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%205.1%2B-3DDC84.svg)](#compatibility)
 [![Build](https://github.com/RobTar97/retroframe/actions/workflows/ci.yml/badge.svg)](https://github.com/RobTar97/retroframe/actions/workflows/ci.yml)
+[![Device tests](https://github.com/RobTar97/retroframe/actions/workflows/device-tests.yml/badge.svg)](https://github.com/RobTar97/retroframe/actions/workflows/device-tests.yml)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.0.21-7F52FF.svg)](https://kotlinlang.org)
 [![No tracking](https://img.shields.io/badge/tracking-none-success.svg)](#privacy)
 
@@ -238,14 +239,17 @@ Full write-up in **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
 
 **Version 0.2.0 — [released](https://github.com/RobTar97/retroframe/releases/latest), but unproven on real hardware.**
 
-The app builds cleanly, R8-minifies to ~3 MB, passes 30 unit tests and passes lint. Version
-0.2.0 was a substantial rewrite that fixed a long list of real defects — including a crash on
-Android 5.1 that had been latent since the beginning, a release build that could never be
-produced at all, and a folder watcher that hammered the storage provider every 10 seconds.
+The app builds cleanly, R8-minifies to ~3 MB, and passes 30 unit tests plus 14 instrumented
+tests run on emulators at **API 22, 28 and 36** on every push. Version 0.2.0 was a substantial
+rewrite that fixed a long list of real defects — including a crash on Android 5.1 that had been
+latent since the beginning, a release build that could never be produced at all, and a folder
+watcher that hammered the storage provider every 10 seconds.
 
-**None of the rewritten code has run on a physical tablet.** That is the honest state of it,
-and it is the first entry in [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) rather than
-something you find out after installing.
+**It still has not run on a physical tablet.** CI proves the code executes on Android 5.1; it
+proves nothing about a 2015 vendor ROM's storage provider, its single hardware video decoder,
+its power management, or how warm it gets after a fortnight on a shelf. That is the honest
+state of it, and it is the first entry in [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) rather
+than something you find out after installing.
 
 If you have an old tablet, **running this and telling us what happened is the most useful
 thing you can do for the project** — more useful than code.

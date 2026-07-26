@@ -7,7 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing yet.
+### Fixed
+
+- **`SCHEDULE_EXACT_ALARMS` was not a real permission.** The manifest had it plural; the
+  actual name is singular. The system therefore never offered it, and the morning alarm ran
+  on inexact timing on every device since the feature was written.
+- **`ACCESS_NETWORK_STATE` was present in the installed app**, merged in from Media3 for
+  adaptive streaming this app never does. Removed, so "no network access" is true on
+  inspection and not just in the readme.
+- **Save and Cancel were below the fold** in settings on an 800px landscape tablet. They are
+  now a fixed footer outside the scroll area.
+
+### Added
+
+- 14 instrumented tests, and a CI emulator matrix at **API 22, 28 and 36**. API 22 is the
+  point: it executes the scheduling code on the oldest supported Android, where a call to a
+  newer API previously would have crashed with nothing noticing.
+- Tests that assert the manifest declares exactly four permissions and no network permission,
+  and that every scheduled receiver is still reachable after a refactor or an R8 rename.
+- ktlint, `.editorconfig`, `CODEOWNERS` and a `docs/` index.
+
+### Changed
+
+- Scheduling consolidated from `util/` and `alarm/` into one `schedule/` package;
+  `ScreenManager` renamed `DailySchedule`, `FolderMonitor` moved to `data/`.
+- Dependencies: AGP 8.13.2, and measured ceilings recorded for everything blocked by
+  `minSdk 22` — Material 1.14, Media3 1.10, lifecycle 2.11, fragment 1.8.9, Glide 5,
+  core-ktx 1.19, AGP 9.x and Gradle 9.x all require a floor this project will not raise.
 
 ## [0.2.0] — 2026-07-26
 

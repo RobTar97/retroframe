@@ -9,23 +9,26 @@ users — if you are looking for somewhere to start contributing, this is the to
 
 ## 🔴 Not yet verified on real hardware
 
-**This is the single most important entry on the page.**
+**Still the most important entry on the page**, though it is narrower than it was.
 
-RetroFrame was substantially rewritten in `0.2.0`. The build is green — it compiles, R8
-minifies it, 30 unit tests pass and lint is clean — but **none of the rewritten code has run
-on a physical tablet.** A green CI build says the code is well-formed. It says nothing about
-whether a 2014 tablet's storage provider behaves the way the code assumes.
+CI now runs 14 instrumented tests on emulators at **API 22, 28 and 36** on every push. That
+retires one specific fear: the app's scheduling code is executed for real on Android 5.1, so
+another call to an API that does not exist there — the bug that made this section necessary —
+turns the build red instead of shipping.
 
-Specifically unproven:
+What an emulator still cannot tell you:
 
-| Change | What could go wrong on real hardware |
+| Change | What an emulator does not reproduce |
 |---|---|
-| `ContentObserver` folder watching | Old vendor document providers are inconsistent about firing change notifications. The 15-minute fallback poll should cover it, but that is untested. |
-| Single shared Media3 player | The attach/detach timing as pages change is the subtlest part of the rewrite. |
-| Media3 on API 22–24 | Media3 claims API 21+, but old vendor codecs are their own world. |
-| `targetSdk 36` edge-to-edge | Enforced edge-to-edge interacts with immersive mode; verified only by reading the docs. |
-| R8 minification | Release builds are newly possible, so release-only reflection failures have never been observed either way. |
-| Wake/sleep schedule | Timing changes were made blind; manufacturer power management varies wildly. |
+| `ContentObserver` folder watching | Old vendor document providers are inconsistent about firing change notifications. A stock emulator image is not a Samsung ROM from 2016. |
+| Single shared Media3 player | Real tablets have one hardware decoder and real thermal limits. |
+| Media3 on API 22–24 | Vendor codecs are their own world. |
+| Wake/sleep schedule | Manufacturer power management is the whole problem, and it is exactly what emulator images lack. |
+| Slow eMMC storage | Emulators run off an SSD. Scan and decode timings are not comparable. |
+| Battery and heat over months | Unmeasurable in CI by definition. |
+
+So: the code is now known to *run* on API 22. Whether it *behaves* on a real 2015 tablet left
+on a shelf for a fortnight is still unknown, and only a device report can answer it.
 
 If you have an old tablet, **running this and reporting back is the most valuable thing you
 can do for the project** — more valuable than code.
