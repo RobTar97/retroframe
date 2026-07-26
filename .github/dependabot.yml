@@ -37,11 +37,20 @@ updates:
         versions: [ ">=2.9.0" ]
       - dependency-name: "androidx.fragment:*"
         versions: [ ">=1.8.6" ]
+      - dependency-name: "com.github.bumptech.glide:*"
+        versions: [ ">=5.0.0" ]
       # Requires compileSdk 37.
       - dependency-name: "androidx.core:core-ktx"
         versions: [ ">=1.17.0" ]
       # Gradle 9 needs AGP 8.13+; revisit together, not separately.
       - dependency-name: "gradle"
+        versions: [ ">=9.0" ]
+      # AGP 9.x requires Gradle 9.5+, which in turn needs a newer Kotlin plugin. Tested:
+      # CI fails with "Minimum supported Gradle version is 9.5.0". The whole toolchain
+      # moves together or not at all.
+      - dependency-name: "com.android.application"
+        versions: [ ">=9.0" ]
+      - dependency-name: "com.android.tools.build:gradle"
         versions: [ ">=9.0" ]
 
   # GitHub Actions used by CI
