@@ -22,8 +22,10 @@ import kotlin.random.Random
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [35])
 class PlaylistBuilderTest {
-
-    private fun item(name: String, id: String = name) = MediaItem(
+    private fun item(
+        name: String,
+        id: String = name,
+    ) = MediaItem(
         documentId = id,
         uri = Uri.parse("content://test/$id"),
         name = name,
@@ -50,9 +52,13 @@ class PlaylistBuilderTest {
     fun `sorted mode orders numbered photos naturally`() {
         // A plain string sort puts IMG_10 before IMG_2, which looks broken for the most
         // common way holiday photos are named.
-        val library = listOf(
-            item("IMG_10.jpg"), item("IMG_2.jpg"), item("IMG_1.jpg"), item("IMG_20.jpg"),
-        )
+        val library =
+            listOf(
+                item("IMG_10.jpg"),
+                item("IMG_2.jpg"),
+                item("IMG_1.jpg"),
+                item("IMG_20.jpg"),
+            )
 
         val playlist = PlaylistBuilder.build(library, emptySet(), shuffle = false)
 
@@ -89,12 +95,13 @@ class PlaylistBuilderTest {
     fun `shuffle on weights favourites`() {
         val library = listOf(item("a.jpg"), item("b.jpg"), item("c.jpg"))
 
-        val playlist = PlaylistBuilder.build(
-            library,
-            favoriteIds = setOf("a.jpg"),
-            shuffle = true,
-            random = Random(1),
-        )
+        val playlist =
+            PlaylistBuilder.build(
+                library,
+                favoriteIds = setOf("a.jpg"),
+                shuffle = true,
+                random = Random(1),
+            )
 
         assertEquals(PlaylistBuilder.FAVORITE_WEIGHT, playlist.count { it.documentId == "a.jpg" })
         assertEquals(1, playlist.count { it.documentId == "b.jpg" })
@@ -106,7 +113,13 @@ class PlaylistBuilderTest {
     fun `shuffle on keeps every photo when nothing is favourited`() {
         val library = (1..20).map { item("photo$it.jpg") }
 
-        val playlist = PlaylistBuilder.build(library, emptySet(), shuffle = true, random = Random(7))
+        val playlist =
+            PlaylistBuilder.build(
+                library,
+                emptySet(),
+                shuffle = true,
+                random = Random(7),
+            )
 
         assertEquals(library.size, playlist.size)
         assertEquals(library.map { it.documentId }.toSet(), playlist.map { it.documentId }.toSet())
@@ -120,12 +133,13 @@ class PlaylistBuilderTest {
         val favorites = setOf("photo1.jpg", "photo2.jpg", "photo3.jpg")
 
         repeat(200) { seed ->
-            val playlist = PlaylistBuilder.build(
-                library,
-                favorites,
-                shuffle = true,
-                random = Random(seed),
-            )
+            val playlist =
+                PlaylistBuilder.build(
+                    library,
+                    favorites,
+                    shuffle = true,
+                    random = Random(seed),
+                )
             val adjacent = playlist.zipWithNext().count { (a, b) -> a.documentId == b.documentId }
             assertTrue("seed $seed produced $adjacent adjacent duplicates", adjacent == 0)
         }
@@ -151,7 +165,13 @@ class PlaylistBuilderTest {
 
         for (favouriteCount in 0..12) {
             val favorites = library.take(favouriteCount).map { it.documentId }.toSet()
-            val playlist = PlaylistBuilder.build(library, favorites, shuffle = true, random = Random(favouriteCount))
+            val playlist =
+                PlaylistBuilder.build(
+                    library,
+                    favorites,
+                    shuffle = true,
+                    random = Random(favouriteCount),
+                )
 
             val expected = library.size + favouriteCount * (PlaylistBuilder.FAVORITE_WEIGHT - 1)
             assertEquals("with $favouriteCount favourites", expected, playlist.size)
@@ -186,7 +206,13 @@ class PlaylistBuilderTest {
         // for 3 of them, so some repetition is unavoidable. It must not hang or drop items.
         val library = listOf(item("a.jpg"), item("b.jpg"))
 
-        val playlist = PlaylistBuilder.build(library, setOf("a.jpg"), shuffle = true, random = Random(3))
+        val playlist =
+            PlaylistBuilder.build(
+                library,
+                setOf("a.jpg"),
+                shuffle = true,
+                random = Random(3),
+            )
 
         assertEquals(4, playlist.size)
         assertEquals(3, playlist.count { it.documentId == "a.jpg" })

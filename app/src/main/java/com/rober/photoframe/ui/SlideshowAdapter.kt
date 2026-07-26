@@ -23,7 +23,6 @@ import com.rober.photoframe.model.MediaItem
 class SlideshowAdapter(
     private val context: Context,
 ) : RecyclerView.Adapter<SlideshowAdapter.SlideViewHolder>() {
-
     private var items: List<MediaItem> = emptyList()
 
     /**
@@ -41,13 +40,20 @@ class SlideshowAdapter(
 
     fun itemAt(position: Int): MediaItem? = items.getOrNull(position)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SlideViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_slideshow, parent, false)
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): SlideViewHolder {
+        val view =
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_slideshow, parent, false)
         return SlideViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: SlideViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: SlideViewHolder,
+        position: Int,
+    ) {
         holder.bind(items[position])
     }
 
@@ -59,7 +65,6 @@ class SlideshowAdapter(
     }
 
     inner class SlideViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
         private val imageView: PhotoView = itemView.findViewById(R.id.imageView)
         val playerView: PlayerView = itemView.findViewById(R.id.playerView)
 

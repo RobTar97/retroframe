@@ -1,4 +1,4 @@
-package com.rober.photoframe.util
+package com.rober.photoframe.schedule
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -26,9 +26,8 @@ import java.util.Calendar
  * missing, returned silently: the schedule the user had configured simply never fired, and
  * nothing said so. Now the schedule always works, and exactness is a bonus when granted.
  */
-object ScreenManager {
-
-    private const val TAG = "ScreenManager"
+object DailySchedule {
+    private const val TAG = "DailySchedule"
 
     const val ACTION_WAKE_UP = "com.rober.photoframe.ACTION_WAKE_UP"
     const val ACTION_SLEEP = "com.rober.photoframe.ACTION_SLEEP"
@@ -81,20 +80,24 @@ object ScreenManager {
         canScheduleExact(context.getSystemService(Context.ALARM_SERVICE) as AlarmManager)
 
     private fun nextOccurrence(minutesSinceMidnight: Int): Long {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, minutesSinceMidnight / 60)
-            set(Calendar.MINUTE, minutesSinceMidnight % 60)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
+        val calendar =
+            Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, minutesSinceMidnight / 60)
+                set(Calendar.MINUTE, minutesSinceMidnight % 60)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
         if (calendar.timeInMillis <= System.currentTimeMillis()) {
             calendar.add(Calendar.DAY_OF_YEAR, 1)
         }
         return calendar.timeInMillis
     }
 
-    private fun pendingIntentFor(context: Context, action: String): PendingIntent {
-        val intent = Intent(context, AlarmReceiver::class.java).setAction(action)
+    private fun pendingIntentFor(
+        context: Context,
+        action: String,
+    ): PendingIntent {
+        val intent = Intent(context, ScheduleReceiver::class.java).setAction(action)
         return PendingIntent.getBroadcast(
             context,
             action.hashCode(),
@@ -109,9 +112,11 @@ object ScreenManager {
         alarmManager.cancel(pendingIntentFor(context, ACTION_SLEEP))
     }
 
-    class AlarmReceiver : BroadcastReceiver() {
-
-        override fun onReceive(context: Context, intent: Intent) {
+    class ScheduleReceiver : BroadcastReceiver() {
+        override fun onReceive(
+            context: Context,
+            intent: Intent,
+        ) {
             PhotoframePreferences.init(context)
             Log.d(TAG, "Alarm fired: ${intent.action}")
 
@@ -128,12 +133,13 @@ object ScreenManager {
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 
             @Suppress("DEPRECATION") // No non-deprecated way to force the screen on.
-            val wakeLock = powerManager.newWakeLock(
-                PowerManager.SCREEN_BRIGHT_WAKE_LOCK or
-                    PowerManager.ACQUIRE_CAUSES_WAKEUP or
-                    PowerManager.ON_AFTER_RELEASE,
-                WAKELOCK_TAG,
-            )
+            val wakeLock =
+                powerManager.newWakeLock(
+                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK or
+                        PowerManager.ACQUIRE_CAUSES_WAKEUP or
+                        PowerManager.ON_AFTER_RELEASE,
+                    WAKELOCK_TAG,
+                )
 
             // acquire(timeout) returns immediately and releases itself when the timeout
             // expires. The previous code wrapped this in try/finally and released the lock
@@ -145,14 +151,18 @@ object ScreenManager {
             launchMode(context, MainActivity.MODE_PHOTO)
         }
 
-        private fun launchMode(context: Context, mode: String) {
-            val intent = Intent(context, MainActivity::class.java)
-                .addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                        Intent.FLAG_ACTIVITY_REORDER_TO_FRONT,
-                )
-                .putExtra(MainActivity.EXTRA_MODE, mode)
+        private fun launchMode(
+            context: Context,
+            mode: String,
+        ) {
+            val intent =
+                Intent(context, MainActivity::class.java)
+                    .addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT,
+                    )
+                    .putExtra(MainActivity.EXTRA_MODE, mode)
 
             try {
                 context.startActivity(intent)

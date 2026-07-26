@@ -3,15 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RetroFrame — the tablet in your drawer still works</title>
-<meta name="description" content="Turn an old Android tablet into a private, offline digital photo frame. No account, no cloud, no tracking — it doesn't even have the INTERNET permission. Android 5.1+, free and open source.">
+<title>RetroFrame — Turn an Old Android Tablet into a Digital Photo Frame</title>
+<meta name="description" content="Turn an old Android tablet into a digital photo frame. Free, open source photo slideshow app that works offline — no account, no cloud, no subscription, no ads. Runs on Android 5.1 and up, so it revives tablets other apps have abandoned.">
 <meta name="theme-color" content="#0E0B08">
+<meta name="keywords" content="old tablet photo frame, digital photo frame app, android photo frame, repurpose old tablet, photo slideshow app, offline digital picture frame, open source photo frame">
 <link rel="icon" href="img/icon.png" type="image/png">
 <link rel="canonical" href="https://robtar97.github.io/retroframe/">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="RetroFrame — the tablet in your drawer still works">
-<meta property="og:description" content="Turn an old Android tablet into a private, offline digital photo frame. No account, no cloud, no tracking.">
+<meta property="og:title" content="RetroFrame — Turn an Old Android Tablet into a Digital Photo Frame">
+<meta property="og:description" content="A free, open source digital photo frame app for old Android tablets. Works offline, no account or subscription. Android 5.1+.">
 <meta property="og:image" content="https://robtar97.github.io/retroframe/img/icon.png">
 <meta property="og:url" content="https://robtar97.github.io/retroframe/">
 <meta name="twitter:card" content="summary_large_image">
@@ -36,6 +37,23 @@
   "url": "https://robtar97.github.io/retroframe/"
 }
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"What can I do with an old Android tablet?","acceptedAnswer":{"@type":"Answer","text":"Make it a digital photo frame. A tablet is already a screen, a power socket and some storage, which is the entire hardware of a photo frame. The battery being tired does not matter because it lives on a charger."}},
+    {"@type":"Question","name":"Can I use a tablet as a digital picture frame?","acceptedAnswer":{"@type":"Answer","text":"Yes. You need an app that fills the screen, hides the Android interface, keeps the display awake and restarts after a power cut. RetroFrame does this and is free and open source."}},
+    {"@type":"Question","name":"Which Android version do I need for a tablet photo frame?","acceptedAnswer":{"@type":"Answer","text":"Android 5.1 Lollipop or newer. Check Settings, About tablet, Android version. RetroFrame supports Android 5.1 and up so it runs on old tablets that newer photo frame apps exclude."}},
+    {"@type":"Question","name":"Does the photo frame app need Wi-Fi, an account or a subscription?","acceptedAnswer":{"@type":"Answer","text":"No. RetroFrame does not declare the Android INTERNET permission, so it cannot reach a network. There is no account, no subscription and no advertising, and photos never leave the tablet."}},
+    {"@type":"Question","name":"How do I get my photos onto the tablet?","acceptedAnswer":{"@type":"Answer","text":"Connect the tablet by USB and choose File transfer on the tablet, then copy your pictures into the Pictures folder. An SD card also works and is easier to change later."}},
+    {"@type":"Question","name":"Will it run on an Amazon Fire tablet?","acceptedAnswer":{"@type":"Answer","text":"It should. Fire OS 5 and later are based on Android 5.1 or newer and sideloading an APK works without the Play Store."}},
+    {"@type":"Question","name":"Will leaving a tablet on damage the screen or battery?","acceptedAnswer":{"@type":"Answer","text":"Heat is the main risk. Use the sleep schedule, lower the brightness and allow airflow. On AMOLED screens a static overlay can cause burn-in, so scheduling matters more there."}},
+    {"@type":"Question","name":"Is RetroFrame really open source?","acceptedAnswer":{"@type":"Answer","text":"Yes, it is licensed under GPL-3.0. You can read the source, build it yourself and modify it, and must share changes under the same licence if you distribute it."}}
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -50,6 +68,7 @@
     <nav class="topbar__nav">
       <a href="#screens">Screens</a>
       <a href="#setup">Set up</a>
+      <a href="#faq">FAQ</a>
       <a href="#engineering">How it's built</a>
       <a href="https://github.com/RobTar97/retroframe">Source</a>
       <a class="btn btn--sm" href="#download">Download</a>
@@ -67,9 +86,10 @@
       <p class="eyebrow">Android 5.1 and up · 3.1 MB · GPL-3.0</p>
       <h1 class="hero__title">The tablet in your&nbsp;drawer still&nbsp;works.</h1>
       <p class="hero__lede">
-        It turns on. The battery is tired and the browser gave up years ago, but the
-        screen is fine. RetroFrame makes it a photo frame — pointed at one folder,
-        showing your photos, asking nothing of you.
+        It turns on. The battery is tired and the browser gave up years ago, but the screen
+        is fine. RetroFrame is a free, open source app that turns an old Android tablet into
+        a digital photo frame — pointed at one folder, showing your photos, asking nothing
+        of you.
       </p>
 
       <div class="hero__cta" id="download">
@@ -149,7 +169,7 @@
 <!-- ───────────────────────── features ───────────────────────── -->
 <section class="section" id="features">
   <div class="wrap">
-    <h2 class="h2 reveal">What it does</h2>
+    <h2 class="h2 reveal">What a tablet photo frame needs to do</h2>
     <div class="grid">
       <article class="card reveal">
         <h3>Shows one folder</h3>
@@ -189,7 +209,7 @@
 <!-- ───────────────────────── gallery ───────────────────────── -->
 <section class="section" id="screens">
   <div class="wrap">
-    <h2 class="h2 reveal">What you actually get</h2>
+    <h2 class="h2 reveal">The photo frame running on a real tablet</h2>
     <p class="lede reveal">
       Captured on a 1280&times;800 tablet — the panel this app was written for.
     </p>
@@ -218,7 +238,7 @@
 <!-- ───────────────────────── setup ───────────────────────── -->
 <section class="section" id="setup">
   <div class="wrap wrap--read">
-    <h2 class="h2 reveal">Setting it up</h2>
+    <h2 class="h2 reveal">How to turn an old tablet into a photo frame</h2>
     <p class="lede reveal">Four steps, about ten minutes, most of which is finding the cable.</p>
 
     <ol class="steps">
@@ -356,6 +376,75 @@
         <code>INTERNET</code> permission, so the operating system won't let it open a socket
         even if a future contributor tried. The claim is checkable in the manifest.</p>
       </article>
+    </div>
+  </div>
+</section>
+
+
+<!-- ───────────────────────── faq ───────────────────────── -->
+<section class="section" id="faq">
+  <div class="wrap wrap--read">
+    <h2 class="h2 reveal">Questions people ask</h2>
+
+    <div class="faq">
+      <details class="faq__q reveal" open>
+        <summary>What can I do with an old Android tablet?</summary>
+        <p>Make it a digital photo frame. A tablet is already a screen, a power socket and
+        some storage, which is the entire hardware of a photo frame that would otherwise cost
+        real money. The battery being tired doesn't matter, because it lives on a charger.</p>
+      </details>
+
+      <details class="faq__q reveal">
+        <summary>Can I use a tablet as a digital picture frame?</summary>
+        <p>Yes. You need an app that fills the screen, hides the Android interface, keeps the
+        display awake and starts itself after a power cut. That is what RetroFrame does, and
+        it is free.</p>
+      </details>
+
+      <details class="faq__q reveal">
+        <summary>Which Android version do I need?</summary>
+        <p><strong>Android 5.1 (Lollipop) or newer.</strong> Check Settings → About tablet →
+        Android version. Most photo frame apps require far newer Android and quietly exclude
+        the exact devices worth reusing; RetroFrame goes as low as the folder-picking API
+        allows.</p>
+      </details>
+
+      <details class="faq__q reveal">
+        <summary>Does it need Wi-Fi, an account, or a subscription?</summary>
+        <p>None of the three. RetroFrame doesn't declare Android's <code>INTERNET</code>
+        permission at all, so it physically cannot reach a network — your photos never leave
+        the tablet. There is no account, no subscription and no advertising.</p>
+      </details>
+
+      <details class="faq__q reveal">
+        <summary>How do I get my photos onto the tablet?</summary>
+        <p>Plug it into your computer with a USB cable and choose <strong>File transfer</strong>
+        on the tablet when the notification appears, then copy your pictures into the
+        <code>Pictures</code> folder. An SD card works too and is easier to change later.
+        Full walkthrough in the
+        <a href="https://github.com/RobTar97/retroframe/blob/main/docs/GETTING_STARTED.md">setup guide</a>.</p>
+      </details>
+
+      <details class="faq__q reveal">
+        <summary>Will it run on an Amazon Fire tablet?</summary>
+        <p>It should — Fire OS 5 and later are built on Android 5.1+, and sideloading an APK
+        works normally without the Play Store. Fire tablets are among the most common devices
+        sitting unused, so reports from them are especially welcome.</p>
+      </details>
+
+      <details class="faq__q reveal">
+        <summary>Will leaving it on damage the screen or battery?</summary>
+        <p>Heat is the real risk, not use. Set a sleep schedule, turn the brightness down and
+        give it airflow. On AMOLED tablets a permanently static overlay can burn in, so the
+        schedule matters more there. See
+        <a href="https://github.com/RobTar97/retroframe/blob/main/docs/CHOOSING_A_TABLET.md">choosing a tablet</a>.</p>
+      </details>
+
+      <details class="faq__q reveal">
+        <summary>Is it really open source?</summary>
+        <p>Yes, GPL-3.0. You can read every line, build it yourself, and change it. If you
+        distribute a modified version you must share your changes under the same licence.</p>
+      </details>
     </div>
   </div>
 </section>

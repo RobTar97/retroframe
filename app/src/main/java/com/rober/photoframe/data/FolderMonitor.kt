@@ -1,4 +1,4 @@
-package com.rober.photoframe.util
+package com.rober.photoframe.data
 
 import android.content.Context
 import android.database.ContentObserver
@@ -7,8 +7,6 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.DocumentsContract
 import android.util.Log
-import com.rober.photoframe.data.FolderSignature
-import com.rober.photoframe.data.PhotoRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -39,7 +37,6 @@ class FolderMonitor(
     private val context: Context,
     private val repository: PhotoRepository,
 ) {
-
     private companion object {
         const val TAG = "FolderMonitor"
 
@@ -63,48 +60,57 @@ class FolderMonitor(
      * first. [scope] should be tied to the UI lifecycle so watching stops when the
      * slideshow is not on screen.
      */
-    fun start(treeUri: Uri, scope: CoroutineScope) {
+    fun start(
+        treeUri: Uri,
+        scope: CoroutineScope,
+    ) {
         stop()
 
-        val childrenUri = try {
-            DocumentsContract.buildChildDocumentsUriUsingTree(
-                treeUri,
-                DocumentsContract.getTreeDocumentId(treeUri),
-            )
-        } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "Cannot watch $treeUri", e)
-            return
-        }
-
-        observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
-            override fun onChange(selfChange: Boolean) = onChange(selfChange, null)
-
-            override fun onChange(selfChange: Boolean, uri: Uri?) {
-                Log.d(TAG, "Provider reported a change")
-                debounce(scope)
-            }
-        }.also { obs ->
+        val childrenUri =
             try {
-                context.contentResolver.registerContentObserver(childrenUri, true, obs)
-            } catch (e: SecurityException) {
-                Log.e(TAG, "Not permitted to observe $treeUri", e)
-                observer = null
+                DocumentsContract.buildChildDocumentsUriUsingTree(
+                    treeUri,
+                    DocumentsContract.getTreeDocumentId(treeUri),
+                )
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "Cannot watch $treeUri", e)
+                return
             }
-        }
 
-        fallbackJob = scope.launch {
-            // Seed the signature so the first poll does not report a spurious change.
-            lastSignature = repository.signature(treeUri)
-            while (isActive) {
-                delay(FALLBACK_POLL_MS)
-                val current = repository.signature(treeUri)
-                if (current != FolderSignature.UNKNOWN && current != lastSignature) {
-                    Log.d(TAG, "Fallback poll detected a change the provider did not report")
-                    lastSignature = current
-                    _changes.tryEmit(Unit)
+        observer =
+            object : ContentObserver(Handler(Looper.getMainLooper())) {
+                override fun onChange(selfChange: Boolean) = onChange(selfChange, null)
+
+                override fun onChange(
+                    selfChange: Boolean,
+                    uri: Uri?,
+                ) {
+                    Log.d(TAG, "Provider reported a change")
+                    debounce(scope)
+                }
+            }.also { obs ->
+                try {
+                    context.contentResolver.registerContentObserver(childrenUri, true, obs)
+                } catch (e: SecurityException) {
+                    Log.e(TAG, "Not permitted to observe $treeUri", e)
+                    observer = null
                 }
             }
-        }
+
+        fallbackJob =
+            scope.launch {
+                // Seed the signature so the first poll does not report a spurious change.
+                lastSignature = repository.signature(treeUri)
+                while (isActive) {
+                    delay(FALLBACK_POLL_MS)
+                    val current = repository.signature(treeUri)
+                    if (current != FolderSignature.UNKNOWN && current != lastSignature) {
+                        Log.d(TAG, "Fallback poll detected a change the provider did not report")
+                        lastSignature = current
+                        _changes.tryEmit(Unit)
+                    }
+                }
+            }
     }
 
     fun stop() {
@@ -118,9 +124,10 @@ class FolderMonitor(
 
     private fun debounce(scope: CoroutineScope) {
         debounceJob?.cancel()
-        debounceJob = scope.launch {
-            delay(DEBOUNCE_MS)
-            _changes.tryEmit(Unit)
-        }
+        debounceJob =
+            scope.launch {
+                delay(DEBOUNCE_MS)
+                _changes.tryEmit(Unit)
+            }
     }
 }

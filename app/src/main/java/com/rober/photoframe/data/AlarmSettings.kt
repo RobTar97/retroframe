@@ -24,7 +24,6 @@ data class Alarm(
 }
 
 object AlarmSettings {
-
     private const val PREF_NAME = "alarm_prefs"
     private const val KEY_HOUR = "alarm_hour"
     private const val KEY_MINUTE = "alarm_minute"

@@ -231,7 +231,7 @@ roadmap.
 ## Watching the logs
 
 ```bash
-adb logcat | grep -E "PhotoRepository|FolderMonitor|ScreenManager|AlarmScheduler|AlarmCompat"
+adb logcat | grep -E "PhotoRepository|FolderMonitor|DailySchedule|AlarmScheduler|AlarmCompat"
 ```
 
 Testing the schedule without waiting overnight: set wake and sleep two minutes apart and

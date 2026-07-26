@@ -6,7 +6,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class MediaTypesTest {
-
     @Test
     fun `mime type identifies images`() {
         assertEquals(MediaType.IMAGE, MediaTypes.classify("image/jpeg", "holiday.jpg"))

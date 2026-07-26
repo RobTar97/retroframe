@@ -16,30 +16,37 @@ import kotlin.math.abs
  * every transition. On a single-core tablet, allocation here causes visible stutter.
  */
 object SlideTransformers {
-
-    fun forEffect(effect: TransitionEffect): ViewPager2.PageTransformer = when (effect) {
-        TransitionEffect.FADE -> Fade
-        TransitionEffect.SLIDE -> Slide
-        TransitionEffect.ZOOM -> Zoom
-    }
+    fun forEffect(effect: TransitionEffect): ViewPager2.PageTransformer =
+        when (effect) {
+            TransitionEffect.FADE -> Fade
+            TransitionEffect.SLIDE -> Slide
+            TransitionEffect.ZOOM -> Zoom
+        }
 
     /**
      * Cross-fade. The page is held in place and only its alpha changes, which is the
      * cheapest of the three — no layer re-rasterisation.
      */
     private object Fade : ViewPager2.PageTransformer {
-        override fun transformPage(page: View, position: Float) {
+        override fun transformPage(
+            page: View,
+            position: Float,
+        ) {
             page.translationX = -position * page.width
-            page.alpha = when {
-                position <= -1f || position >= 1f -> 0f
-                else -> 1f - abs(position)
-            }
+            page.alpha =
+                when {
+                    position <= -1f || position >= 1f -> 0f
+                    else -> 1f - abs(position)
+                }
         }
     }
 
     /** The platform default: pages slide horizontally with no extra effect. */
     private object Slide : ViewPager2.PageTransformer {
-        override fun transformPage(page: View, position: Float) {
+        override fun transformPage(
+            page: View,
+            position: Float,
+        ) {
             page.alpha = 1f
             page.translationX = 0f
             page.scaleX = 1f
@@ -52,7 +59,10 @@ object SlideTransformers {
         private const val MIN_SCALE = 0.80f
         private const val MIN_ALPHA = 0.30f
 
-        override fun transformPage(page: View, position: Float) {
+        override fun transformPage(
+            page: View,
+            position: Float,
+        ) {
             when {
                 position <= -1f || position >= 1f -> {
                     page.alpha = 0f

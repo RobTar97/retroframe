@@ -84,7 +84,7 @@ body:
       label: Logs
       description: |
         If you can, attach logcat output. Filtered is fine:
-        `adb logcat | grep -E "PhotoRepository|ScreenManager|DirectoryWatcher|AlarmScheduler|AndroidRuntime"`
+        `adb logcat | grep -E "PhotoRepository|DailySchedule|FolderMonitor|AlarmScheduler|AndroidRuntime"`
       render: shell
 
   - type: checkboxes

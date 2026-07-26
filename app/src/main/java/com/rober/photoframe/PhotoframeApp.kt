@@ -7,7 +7,6 @@ import com.rober.photoframe.settings.PhotoframePreferences
 import com.rober.photoframe.ui.ImageLoader
 
 class PhotoframeApp : Application() {
-
     override fun onCreate() {
         super.onCreate()
 

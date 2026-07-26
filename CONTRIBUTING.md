@@ -84,7 +84,7 @@ just be upfront about it.
 Useful during development:
 
 ```bash
-adb logcat | grep -E "PhotoRepository|ScreenManager|FolderMonitor|AlarmScheduler|AlarmCompat"
+adb logcat | grep -E "PhotoRepository|DailySchedule|FolderMonitor|AlarmScheduler|AlarmCompat"
 ```
 
 Testing the schedule without waiting overnight: set wake and sleep a couple of minutes apart,

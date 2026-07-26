@@ -43,6 +43,9 @@ jobs:
       - name: Run unit tests
         run: ./gradlew test --stacktrace
 
+      - name: Kotlin style
+        run: ./gradlew ktlintCheck --stacktrace
+
       - name: Android lint
         run: ./gradlew lint --stacktrace
 

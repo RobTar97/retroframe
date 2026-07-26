@@ -46,6 +46,7 @@ app/src/main/java/com/rober/photoframe/
 │
 ├── data/
 │   ├── PhotoRepository.kt      Single-cursor SAF scan (see below)
+│   ├── FolderMonitor.kt        ContentObserver + slow fallback poll
 │   ├── PlaylistBuilder.kt      Pure: sorting, favourite weighting, interleaving
 │   ├── MediaTypes.kt           Pure: MIME/extension → MediaType
 │   ├── FavoritesManager.kt     Favourite document IDs, cached in memory
@@ -64,18 +65,19 @@ app/src/main/java/com/rober/photoframe/
 │   ├── SlideTransformers.kt    Fade / Slide / Zoom
 │   └── ClockFragment.kt        Clock mode
 │
-├── util/
-│   ├── ScreenManager.kt        Wake/sleep schedule + its receiver
-│   ├── FolderMonitor.kt        ContentObserver + fallback poll
-│   └── AlarmCompat.kt          Version-safe alarm scheduling
-│
-├── alarm/
-│   ├── AlarmScheduler.kt       Morning alarm
-│   └── AlarmReceiver.kt        Notification; also holds AlarmDismissReceiver
+├── schedule/                   Everything time-driven, in one package
+│   ├── DailySchedule.kt        Wake/sleep times + its ScheduleReceiver
+│   ├── AlarmScheduler.kt       The morning alarm clock
+│   ├── AlarmReceiver.kt        Alarm notification; also holds AlarmDismissReceiver
+│   └── AlarmCompat.kt          Version-safe scheduling — the API 22 crash guard
 │
 └── boot/
     └── BootReceiver.kt         Re-arms everything after a reboot
 ```
+
+Scheduling used to be split across `util/` and `alarm/`, so "how does the wake schedule work"
+and "how does the alarm clock work" lived in different places with their shared compatibility
+helper in a third. They are one concern and now share one package.
 
 ## The two modes
 
@@ -202,8 +204,8 @@ by `BootReceiver` because Android drops pending alarms on shutdown.
 
 | | Owner | Exactness | Effect |
 |---|---|---|---|
-| **Wake** | `ScreenManager` | Inexact (±1 min) | Wake lock, launch in `PHOTO` mode |
-| **Sleep** | `ScreenManager` | Inexact (±1 min) | Launch in `CLOCK` mode; screen may sleep |
+| **Wake** | `DailySchedule` | Inexact (±1 min) | Wake lock, launch in `PHOTO` mode |
+| **Sleep** | `DailySchedule` | Inexact (±1 min) | Launch in `CLOCK` mode; screen may sleep |
 | **Alarm clock** | `AlarmScheduler` | Exact if permitted | Full-screen notification + alarm sound |
 
 `AlarmCompat` picks the best API for the running device — `setExactAndAllowWhileIdle` on 23+,

@@ -1,4 +1,4 @@
-package com.rober.photoframe.alarm
+package com.rober.photoframe.schedule
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.rober.photoframe.data.Alarm
-import com.rober.photoframe.util.AlarmCompat
-import com.rober.photoframe.util.ScreenManager
 import java.util.Calendar
 
 /**
@@ -19,15 +17,17 @@ import java.util.Calendar
  * approximately rather than not at all.
  */
 object AlarmScheduler {
-
     private const val TAG = "AlarmScheduler"
     private const val WINDOW_MS = 60_000L
 
-    fun schedule(context: Context, alarm: Alarm) {
+    fun schedule(
+        context: Context,
+        alarm: Alarm,
+    ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerAt = nextOccurrence(alarm)
 
-        if (!ScreenManager.canScheduleExact(alarmManager)) {
+        if (!DailySchedule.canScheduleExact(alarmManager)) {
             Log.w(TAG, "Exact alarms not permitted; falling back to an inexact window")
         }
 
@@ -41,28 +41,36 @@ object AlarmScheduler {
         Log.d(TAG, "Alarm scheduled for ${java.util.Date(triggerAt)}")
     }
 
-    fun cancel(context: Context, alarm: Alarm) {
+    fun cancel(
+        context: Context,
+        alarm: Alarm,
+    ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(pendingIntentFor(context, alarm))
         Log.d(TAG, "Alarm cancelled")
     }
 
     private fun nextOccurrence(alarm: Alarm): Long {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, alarm.hour)
-            set(Calendar.MINUTE, alarm.minute)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
+        val calendar =
+            Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, alarm.hour)
+                set(Calendar.MINUTE, alarm.minute)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
         if (calendar.timeInMillis <= System.currentTimeMillis()) {
             calendar.add(Calendar.DAY_OF_YEAR, 1)
         }
         return calendar.timeInMillis
     }
 
-    private fun pendingIntentFor(context: Context, alarm: Alarm): PendingIntent {
-        val intent = Intent(context, AlarmReceiver::class.java)
-            .setAction(AlarmReceiver.ACTION_ALARM)
+    private fun pendingIntentFor(
+        context: Context,
+        alarm: Alarm,
+    ): PendingIntent {
+        val intent =
+            Intent(context, AlarmReceiver::class.java)
+                .setAction(AlarmReceiver.ACTION_ALARM)
         return PendingIntent.getBroadcast(
             context,
             alarm.requestCode,

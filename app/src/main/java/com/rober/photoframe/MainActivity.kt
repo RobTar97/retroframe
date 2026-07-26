@@ -27,10 +27,10 @@ import com.rober.photoframe.ui.SlideshowFragment
  * photo mode holds it awake, clock mode releases it so the device's own timeout applies.
  */
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
-
-    private val notificationPermission = registerForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { /* The alarm still fires without it; only the notification is suppressed. */ }
+    private val notificationPermission =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { /* The alarm still fires without it; only the notification is suppressed. */ }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,18 +74,24 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     private val screenTaps by lazy {
-        GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-                (supportFragmentManager.findFragmentById(R.id.container) as? ScreenTapListener)
-                    ?.onScreenTapped(e.rawX.toInt(), e.rawY.toInt())
-                return false
-            }
-        })
+        GestureDetector(
+            this,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                    (supportFragmentManager.findFragmentById(R.id.container) as? ScreenTapListener)
+                        ?.onScreenTapped(e.rawX.toInt(), e.rawY.toInt())
+                    return false
+                }
+            },
+        )
     }
 
     /** Implemented by whichever fragment wants to know about bare screen taps. */
     interface ScreenTapListener {
-        fun onScreenTapped(rawX: Int, rawY: Int)
+        fun onScreenTapped(
+            rawX: Int,
+            rawY: Int,
+        )
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -149,10 +155,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private fun requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
 
-        val granted = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.POST_NOTIFICATIONS,
-        ) == PackageManager.PERMISSION_GRANTED
+        val granted =
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
 
         // Only worth asking if the user actually has an alarm configured.
         if (!granted && com.rober.photoframe.data.AlarmSettings.get()?.enabled == true) {

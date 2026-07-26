@@ -15,12 +15,14 @@ import com.rober.photoframe.R
  * off — which is the entire point of having a sleep time.
  */
 class ClockFragment : Fragment(R.layout.fragment_clock) {
-
     private lateinit var btnBackToPhotos: Button
 
     private val hideButton = Runnable { btnBackToPhotos.visibility = View.GONE }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         btnBackToPhotos = view.findViewById(R.id.btnBackToPhotos)

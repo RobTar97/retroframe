@@ -14,7 +14,6 @@ import java.util.Locale
  * Pure functions with no Android dependencies, so they are directly unit testable.
  */
 object MediaTypes {
-
     private val IMAGE_EXTENSIONS = setOf(
         "jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif",
     )

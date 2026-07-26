@@ -24,7 +24,6 @@ import com.rober.photoframe.settings.PhotoframePreferences
  */
 @OptIn(UnstableApi::class)
 class SharedPlayer(private val context: Context) {
-
     private var player: ExoPlayer? = null
     private var attachedView: PlayerView? = null
     private var onEnded: (() -> Unit)? = null

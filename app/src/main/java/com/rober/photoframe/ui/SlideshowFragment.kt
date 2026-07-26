@@ -1,19 +1,16 @@
 package com.rober.photoframe.ui
 
-import androidx.core.net.toUri
-
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -33,7 +30,6 @@ import kotlinx.coroutines.launch
 class SlideshowFragment :
     Fragment(R.layout.fragment_slideshow),
     MainActivity.ScreenTapListener {
-
     private val viewModel: SlideshowViewModel by viewModels()
 
     private lateinit var viewPager: ViewPager2
@@ -51,26 +47,34 @@ class SlideshowFragment :
 
     private val hideControls = Runnable { setControlsVisible(false) }
 
-    private val folderPicker = registerForActivityResult(
-        ActivityResultContracts.OpenDocumentTree(),
-    ) { uri ->
-        uri ?: return@registerForActivityResult
+    private val folderPicker =
+        registerForActivityResult(
+            ActivityResultContracts.OpenDocumentTree(),
+        ) { uri ->
+            uri ?: return@registerForActivityResult
 
-        val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-        try {
-            requireContext().contentResolver.takePersistableUriPermission(uri, flags)
-        } catch (e: SecurityException) {
-            Toast.makeText(requireContext(), R.string.error_folder_permission, Toast.LENGTH_LONG)
-                .show()
-            return@registerForActivityResult
+            val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            try {
+                requireContext().contentResolver.takePersistableUriPermission(uri, flags)
+            } catch (e: SecurityException) {
+                Toast.makeText(
+                    requireContext(),
+                    R.string.error_folder_permission,
+                    Toast.LENGTH_LONG,
+                )
+                    .show()
+                return@registerForActivityResult
+            }
+
+            releasePreviousFolderPermission(uri.toString())
+            PhotoframePreferences.galleryUriString = uri.toString()
+            viewModel.onSettingsChanged(folderChanged = true)
         }
 
-        releasePreviousFolderPermission(uri.toString())
-        PhotoframePreferences.galleryUriString = uri.toString()
-        viewModel.onSettingsChanged(folderChanged = true)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         viewPager = view.findViewById(R.id.viewPager)
@@ -118,16 +122,17 @@ class SlideshowFragment :
      * behave as before, which is fine because they have no such restriction.
      */
     private fun openFolderPicker() {
-        val start = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            runCatching {
-                DocumentsContract.buildDocumentUri(
-                    EXTERNAL_STORAGE_AUTHORITY,
-                    "primary:$PREFERRED_START_FOLDER",
-                )
-            }.getOrNull()
-        } else {
-            null
-        }
+        val start =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                runCatching {
+                    DocumentsContract.buildDocumentUri(
+                        EXTERNAL_STORAGE_AUTHORITY,
+                        "primary:$PREFERRED_START_FOLDER",
+                    )
+                }.getOrNull()
+            } else {
+                null
+            }
         folderPicker.launch(start)
     }
 
@@ -154,18 +159,20 @@ class SlideshowFragment :
         // Tap-to-reveal is driven by MainActivity.dispatchTouchEvent, which is the only layer
         // PhotoView cannot cut out of the touch stream. See onScreenTapped below.
 
-        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                onSlideSelected(position)
-            }
-
-            override fun onPageScrollStateChanged(state: Int) {
-                if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
-                    // The user is taking over; stop any video mid-swipe.
-                    player.pause()
+        viewPager.registerOnPageChangeCallback(
+            object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    onSlideSelected(position)
                 }
-            }
-        })
+
+                override fun onPageScrollStateChanged(state: Int) {
+                    if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
+                        // The user is taking over; stop any video mid-swipe.
+                        player.pause()
+                    }
+                }
+            },
+        )
     }
 
     private fun onSlideSelected(position: Int) {
@@ -191,8 +198,9 @@ class SlideshowFragment :
         viewPager.post {
             if (!isAdded) return@post
             val recycler = viewPager.getChildAt(0) as? RecyclerView ?: return@post
-            val holder = recycler.findViewHolderForAdapterPosition(position)
-                as? SlideshowAdapter.SlideViewHolder ?: return@post
+            val holder =
+                recycler.findViewHolderForAdapterPosition(position)
+                    as? SlideshowAdapter.SlideViewHolder ?: return@post
             val item = adapter.itemAt(position) ?: return@post
             player.playOn(holder.playerView, item.uri)
         }
@@ -262,7 +270,10 @@ class SlideshowFragment :
      * the chrome itself, where the buttons have already handled it and toggling as well would
      * make every button press also dismiss the bar it lives on.
      */
-    override fun onScreenTapped(rawX: Int, rawY: Int) {
+    override fun onScreenTapped(
+        rawX: Int,
+        rawY: Int,
+    ) {
         if (!isAdded) return
         if (controlsOverlay.visibility == View.VISIBLE && hits(controlsOverlay, rawX, rawY)) return
         if (hits(topOverlay, rawX, rawY)) return
@@ -270,7 +281,11 @@ class SlideshowFragment :
         toggleControls()
     }
 
-    private fun hits(target: View, rawX: Int, rawY: Int): Boolean {
+    private fun hits(
+        target: View,
+        rawX: Int,
+        rawY: Int,
+    ): Boolean {
         val xy = IntArray(2)
         target.getLocationOnScreen(xy)
         return rawX >= xy[0] && rawX <= xy[0] + target.width &&
@@ -347,8 +362,11 @@ class SlideshowFragment :
 
         viewModel.isPlaying.observe(viewLifecycleOwner) { playing ->
             btnPlayPause.setImageResource(
-                if (playing) android.R.drawable.ic_media_pause
-                else android.R.drawable.ic_media_play,
+                if (playing) {
+                    android.R.drawable.ic_media_pause
+                } else {
+                    android.R.drawable.ic_media_play
+                },
             )
             if (!playing) player.pause()
         }

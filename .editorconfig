@@ -1,0 +1,58 @@
+# Contributors will be on Windows, macOS and Linux. .gitattributes normalises line
+# endings in the repository; this normalises what editors produce in the first place.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+max_line_length = 100
+
+[*.{kt,kts}]
+indent_size = 4
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+# Wildcard imports hide what a file actually depends on.
+ij_kotlin_name_count_to_use_star_import = 2147483647
+ij_kotlin_name_count_to_use_star_import_for_members = 2147483647
+
+[*.{xml,yml,yaml,json}]
+indent_size = 4
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.{md,markdown}]
+# Two trailing spaces are a hard line break in Markdown.
+trim_trailing_whitespace = false
+max_line_length = 100
+
+[*.{html,css,js}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[gradlew]
+end_of_line = lf
+
+[*.bat]
+end_of_line = crlf
+
+# ── ktlint ──────────────────────────────────────────────────────────────────
+# ktlint runs in CI, but its default wrapping rules fight the way this codebase is
+# written. Short collections read better on one line than one element per line, and
+# inline /* paramName = */ labels are clearer above a call than as orphaned comments.
+# These are disabled deliberately, not by neglect.
+[*.{kt,kts}]
+ktlint_standard_argument-list-wrapping = disabled
+ktlint_standard_function-signature = disabled
+ktlint_standard_comment-wrapping = disabled
+ktlint_standard_value-argument-comment = disabled
+ktlint_standard_multiline-expression-wrapping = disabled
+ktlint_standard_string-template-indent = disabled
+# Test names are written as readable sentences in backticks.
+ktlint_standard_function-naming = disabled

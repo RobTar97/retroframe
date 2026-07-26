@@ -4,7 +4,7 @@
 
 # RetroFrame
 
-**Give your old tablet a second life as a digital photo frame.**
+**Turn an old Android tablet into a digital photo frame.**
 
 Point it at a folder. It shows your photos. That's the whole app.
 
@@ -28,6 +28,11 @@ Point it at a folder. It shows your photos. That's the whole app.
 </div>
 
 ---
+
+RetroFrame is a free, open source **digital photo frame app for Android tablets**. It runs a
+fullscreen photo slideshow from one folder on the device, works entirely **offline**, and needs
+**no account, no cloud service and no subscription**. It supports **Android 5.1 and newer**, so
+it revives old tablets that modern photo frame apps have stopped supporting.
 
 ## Why this exists
 
@@ -206,7 +211,7 @@ each would cost startup time and APK size on a device that has neither to spare.
 MainActivity ──── swaps two fragments ────┬── SlideshowFragment (screen kept on)
      │                                    └── ClockFragment     (screen may sleep)
      │
-     └── AlarmCompat ──► ScreenManager.AlarmReceiver
+     └── AlarmCompat ──► DailySchedule.AlarmReceiver
                               ├── wake  → wake lock + launch in PHOTO mode
                               └── sleep → launch in CLOCK mode
 

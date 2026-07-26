@@ -6,7 +6,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class TimeOfDayTest {
-
     @Test
     fun `parses valid times`() {
         assertEquals(0, TimeOfDay.parse("00:00"))

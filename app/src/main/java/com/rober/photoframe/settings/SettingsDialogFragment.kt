@@ -1,8 +1,6 @@
 package com.rober.photoframe.settings
 
 import android.content.Intent
-import android.net.Uri
-import androidx.core.net.toUri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -16,16 +14,16 @@ import android.widget.EditText
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import com.rober.photoframe.R
-import com.rober.photoframe.alarm.AlarmScheduler
 import com.rober.photoframe.data.Alarm
 import com.rober.photoframe.data.AlarmSettings
+import com.rober.photoframe.schedule.AlarmScheduler
+import com.rober.photoframe.schedule.DailySchedule
 import com.rober.photoframe.ui.AboutDialogFragment
-import com.rober.photoframe.util.ScreenManager
 
 class SettingsDialogFragment : DialogFragment() {
-
     private lateinit var etInterval: EditText
     private lateinit var cbShuffle: CheckBox
     private lateinit var cbVideos: CheckBox
@@ -48,7 +46,10 @@ class SettingsDialogFragment : DialogFragment() {
         savedInstanceState: Bundle?,
     ): View = inflater.inflate(R.layout.dialog_settings, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         etInterval = view.findViewById(R.id.etInterval)
@@ -96,7 +97,10 @@ class SettingsDialogFragment : DialogFragment() {
     }
 
     private fun loadSettings() {
-        etInterval.setText(PhotoframePreferences.slideIntervalSeconds.toString(), TextView.BufferType.EDITABLE)
+        etInterval.setText(
+            PhotoframePreferences.slideIntervalSeconds.toString(),
+            TextView.BufferType.EDITABLE,
+        )
         cbShuffle.isChecked = PhotoframePreferences.shuffle
         cbVideos.isChecked = PhotoframePreferences.includeVideos
         cbVideoSound.isChecked = PhotoframePreferences.videoSoundEnabled
@@ -126,12 +130,15 @@ class SettingsDialogFragment : DialogFragment() {
         // Validate times before writing anything, so a typo cannot leave settings half-applied.
         if (!validateTime(etWakeTime, R.string.error_wake_time)) return false
         if (!validateTime(etSleepTime, R.string.error_sleep_time)) return false
-        if (cbAlarmEnabled.isChecked && !validateTime(etAlarmTime, R.string.error_alarm_time, required = true)) {
+        if (cbAlarmEnabled.isChecked &&
+            !validateTime(etAlarmTime, R.string.error_alarm_time, required = true)
+        ) {
             return false
         }
 
-        val interval = etInterval.text.toString().toIntOrNull()
-            ?: PhotoframePreferences.DEFAULT_INTERVAL_SECONDS
+        val interval =
+            etInterval.text.toString().toIntOrNull()
+                ?: PhotoframePreferences.DEFAULT_INTERVAL_SECONDS
 
         PhotoframePreferences.slideIntervalSeconds = interval
         PhotoframePreferences.shuffle = cbShuffle.isChecked
@@ -140,17 +147,18 @@ class SettingsDialogFragment : DialogFragment() {
         PhotoframePreferences.keepScreenOn = cbKeepScreenOn.isChecked
         PhotoframePreferences.autoStartOnBoot = cbAutoStart.isChecked
 
-        PhotoframePreferences.transitionEffect = when (rgTransition.checkedRadioButtonId) {
-            R.id.rbSlide -> TransitionEffect.SLIDE
-            R.id.rbZoom -> TransitionEffect.ZOOM
-            else -> TransitionEffect.FADE
-        }
+        PhotoframePreferences.transitionEffect =
+            when (rgTransition.checkedRadioButtonId) {
+                R.id.rbSlide -> TransitionEffect.SLIDE
+                R.id.rbZoom -> TransitionEffect.ZOOM
+                else -> TransitionEffect.FADE
+            }
 
         PhotoframePreferences.wakeTime = etWakeTime.text.toString()
         PhotoframePreferences.sleepTime = etSleepTime.text.toString()
 
         val context = requireContext()
-        ScreenManager.scheduleAlarms(context)
+        DailySchedule.scheduleAlarms(context)
         saveAlarm(context)
 
         return true
@@ -173,7 +181,11 @@ class SettingsDialogFragment : DialogFragment() {
         AlarmScheduler.schedule(context, alarm)
     }
 
-    private fun validateTime(field: EditText, errorRes: Int, required: Boolean = false): Boolean {
+    private fun validateTime(
+        field: EditText,
+        errorRes: Int,
+        required: Boolean = false,
+    ): Boolean {
         val text = field.text.toString().trim()
         if (text.isEmpty()) {
             if (!required) return true
@@ -197,8 +209,9 @@ class SettingsDialogFragment : DialogFragment() {
         // screen as the dialog is being dismissed), and the fields are lateinit.
         if (view == null || !isAdded) return
 
-        val needed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            !ScreenManager.canScheduleExact(requireContext())
+        val needed =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                !DailySchedule.canScheduleExact(requireContext())
 
         exactAlarmWarning.visibility = if (needed) View.VISIBLE else View.GONE
         if (!needed) return

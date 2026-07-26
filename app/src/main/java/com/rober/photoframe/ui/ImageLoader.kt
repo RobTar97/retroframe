@@ -24,7 +24,6 @@ import com.bumptech.glide.request.RequestOptions
  * these devices ship with.
  */
 object ImageLoader {
-
     private var decodeWidth = 1280
     private var decodeHeight = 800
     private var lowRam = false

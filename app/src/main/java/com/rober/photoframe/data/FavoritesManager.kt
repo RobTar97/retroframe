@@ -15,7 +15,6 @@ import android.net.Uri
  * implementation re-read and re-parsed a delimited string from disk each time.
  */
 object FavoritesManager {
-
     private const val PREFS_NAME = "photoframe_favorites"
     private const val KEY_FAVORITES = "favorite_document_ids"
 
@@ -77,7 +76,9 @@ object FavoritesManager {
         legacy.split(LEGACY_DELIMITER)
             .asSequence()
             .filter { it.isNotBlank() }
-            .mapNotNull { uri -> uri.substringAfterLast("/document/", "").takeIf(String::isNotEmpty) }
+            .mapNotNull { uri ->
+                uri.substringAfterLast("/document/", "").takeIf(String::isNotEmpty)
+            }
             .map { Uri.decode(it) }
             .forEach { cache.add(it) }
 

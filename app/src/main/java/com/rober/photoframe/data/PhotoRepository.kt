@@ -35,17 +35,17 @@ class PhotoRepository(
     private val context: Context,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
-
     private companion object {
         const val TAG = "PhotoRepository"
 
-        val PROJECTION = arrayOf(
-            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-            DocumentsContract.Document.COLUMN_MIME_TYPE,
-            DocumentsContract.Document.COLUMN_LAST_MODIFIED,
-            DocumentsContract.Document.COLUMN_SIZE,
-        )
+        val PROJECTION =
+            arrayOf(
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                DocumentsContract.Document.COLUMN_MIME_TYPE,
+                DocumentsContract.Document.COLUMN_LAST_MODIFIED,
+                DocumentsContract.Document.COLUMN_SIZE,
+            )
     }
 
     /**
@@ -56,18 +56,22 @@ class PhotoRepository(
      * that has been running for weeks should degrade to showing nothing, not crash, when an
      * SD card is removed.
      */
-    suspend fun scan(treeUri: Uri, includeVideos: Boolean): List<MediaItem> =
+    suspend fun scan(
+        treeUri: Uri,
+        includeVideos: Boolean,
+    ): List<MediaItem> =
         withContext(ioDispatcher) {
-            val childrenUri = try {
-                DocumentsContract.buildChildDocumentsUriUsingTree(
-                    treeUri,
-                    DocumentsContract.getTreeDocumentId(treeUri),
-                )
-            } catch (e: IllegalArgumentException) {
-                // Saved URI is from an older install, a different provider, or is malformed.
-                Log.e(TAG, "Not a usable tree URI: $treeUri", e)
-                return@withContext emptyList()
-            }
+            val childrenUri =
+                try {
+                    DocumentsContract.buildChildDocumentsUriUsingTree(
+                        treeUri,
+                        DocumentsContract.getTreeDocumentId(treeUri),
+                    )
+                } catch (e: IllegalArgumentException) {
+                    // Saved URI is from an older install, a different provider, or is malformed.
+                    Log.e(TAG, "Not a usable tree URI: $treeUri", e)
+                    return@withContext emptyList()
+                }
 
             val items = ArrayList<MediaItem>(256)
 
@@ -94,16 +98,20 @@ class PhotoRepository(
                             continue
                         }
 
-                        items += MediaItem(
-                            documentId = documentId,
-                            uri = DocumentsContract.buildDocumentUriUsingTree(treeUri, documentId),
-                            name = name,
-                            type = type,
-                            dateModified = modifiedColumn.takeIf { it >= 0 }
-                                ?.let { cursor.getLong(it) } ?: 0L,
-                            size = sizeColumn.takeIf { it >= 0 }
-                                ?.let { cursor.getLong(it) } ?: 0L,
-                        )
+                        items +=
+                            MediaItem(
+                                documentId = documentId,
+                                uri = DocumentsContract
+                                    .buildDocumentUriUsingTree(treeUri, documentId),
+                                name = name,
+                                type = type,
+                                dateModified =
+                                    modifiedColumn.takeIf { it >= 0 }
+                                        ?.let { cursor.getLong(it) } ?: 0L,
+                                size =
+                                    sizeColumn.takeIf { it >= 0 }
+                                        ?.let { cursor.getLong(it) } ?: 0L,
+                            )
                     }
                 }
             } catch (e: SecurityException) {
@@ -123,35 +131,37 @@ class PhotoRepository(
      * Cheap change-detection signature for the folder. Used by [FolderMonitor]'s safety-net
      * poll to decide whether anything actually changed, without building the full media list.
      */
-    suspend fun signature(treeUri: Uri): FolderSignature = withContext(ioDispatcher) {
-        val childrenUri = try {
-            DocumentsContract.buildChildDocumentsUriUsingTree(
-                treeUri,
-                DocumentsContract.getTreeDocumentId(treeUri),
-            )
-        } catch (e: IllegalArgumentException) {
-            return@withContext FolderSignature.UNKNOWN
-        }
-
-        var count = 0
-        var modifiedSum = 0L
-
-        try {
-            queryChildren(childrenUri)?.use { cursor ->
-                val modifiedColumn = cursor.getColumnIndex(PROJECTION[3])
-                while (cursor.moveToNext()) {
-                    coroutineContext.ensureActive()
-                    count++
-                    if (modifiedColumn >= 0) modifiedSum += cursor.getLong(modifiedColumn)
+    suspend fun signature(treeUri: Uri): FolderSignature =
+        withContext(ioDispatcher) {
+            val childrenUri =
+                try {
+                    DocumentsContract.buildChildDocumentsUriUsingTree(
+                        treeUri,
+                        DocumentsContract.getTreeDocumentId(treeUri),
+                    )
+                } catch (e: IllegalArgumentException) {
+                    return@withContext FolderSignature.UNKNOWN
                 }
-            } ?: return@withContext FolderSignature.UNKNOWN
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to read folder signature", e)
-            return@withContext FolderSignature.UNKNOWN
-        }
 
-        FolderSignature(count, modifiedSum)
-    }
+            var count = 0
+            var modifiedSum = 0L
+
+            try {
+                queryChildren(childrenUri)?.use { cursor ->
+                    val modifiedColumn = cursor.getColumnIndex(PROJECTION[3])
+                    while (cursor.moveToNext()) {
+                        coroutineContext.ensureActive()
+                        count++
+                        if (modifiedColumn >= 0) modifiedSum += cursor.getLong(modifiedColumn)
+                    }
+                } ?: return@withContext FolderSignature.UNKNOWN
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to read folder signature", e)
+                return@withContext FolderSignature.UNKNOWN
+            }
+
+            FolderSignature(count, modifiedSum)
+        }
 
     private fun queryChildren(childrenUri: Uri): Cursor? =
         context.contentResolver.query(childrenUri, PROJECTION, null, null, null)

@@ -12,7 +12,6 @@ import android.content.SharedPreferences
  * synchronous disk write on a settings screen the user visits rarely.
  */
 object PhotoframePreferences {
-
     private const val PREF_NAME = "photoframe_prefs"
 
     private const val KEY_SLIDE_INTERVAL = "slide_interval"
@@ -45,60 +44,87 @@ object PhotoframePreferences {
         get() = prefs.getInt(KEY_SLIDE_INTERVAL, DEFAULT_INTERVAL_SECONDS)
         set(value) {
             prefs.edit()
-                .putInt(KEY_SLIDE_INTERVAL, value.coerceIn(MIN_INTERVAL_SECONDS, MAX_INTERVAL_SECONDS))
+                .putInt(
+                    KEY_SLIDE_INTERVAL,
+                    value.coerceIn(MIN_INTERVAL_SECONDS, MAX_INTERVAL_SECONDS),
+                )
                 .commit()
         }
 
     var shuffle: Boolean
         get() = prefs.getBoolean(KEY_SHUFFLE, true)
-        set(value) { prefs.edit().putBoolean(KEY_SHUFFLE, value).commit() }
+        set(value) {
+            prefs.edit().putBoolean(KEY_SHUFFLE, value).commit()
+        }
 
     var includeVideos: Boolean
         get() = prefs.getBoolean(KEY_INCLUDE_VIDEOS, true)
-        set(value) { prefs.edit().putBoolean(KEY_INCLUDE_VIDEOS, value).commit() }
+        set(value) {
+            prefs.edit().putBoolean(KEY_INCLUDE_VIDEOS, value).commit()
+        }
 
     var galleryUriString: String?
         get() = prefs.getString(KEY_GALLERY_URI, null)
-        set(value) { prefs.edit().putString(KEY_GALLERY_URI, value).commit() }
+        set(value) {
+            prefs.edit().putString(KEY_GALLERY_URI, value).commit()
+        }
 
     var transitionEffect: TransitionEffect
         get() = TransitionEffect.fromKey(prefs.getString(KEY_TRANSITION, null))
-        set(value) { prefs.edit().putString(KEY_TRANSITION, value.key).commit() }
+        set(value) {
+            prefs.edit().putString(KEY_TRANSITION, value.key).commit()
+        }
 
     var autoStartOnBoot: Boolean
         get() = prefs.getBoolean(KEY_AUTO_START, false)
-        set(value) { prefs.edit().putBoolean(KEY_AUTO_START, value).commit() }
+        set(value) {
+            prefs.edit().putBoolean(KEY_AUTO_START, value).commit()
+        }
 
     var videoSoundEnabled: Boolean
         get() = prefs.getBoolean(KEY_VIDEO_SOUND, false)
-        set(value) { prefs.edit().putBoolean(KEY_VIDEO_SOUND, value).commit() }
+        set(value) {
+            prefs.edit().putBoolean(KEY_VIDEO_SOUND, value).commit()
+        }
 
     /** The first-run explanation is shown once, before the folder picker. */
     var hasSeenWelcome: Boolean
         get() = prefs.getBoolean(KEY_SEEN_WELCOME, false)
-        set(value) { prefs.edit().putBoolean(KEY_SEEN_WELCOME, value).commit() }
+        set(value) {
+            prefs.edit().putBoolean(KEY_SEEN_WELCOME, value).commit()
+        }
 
     /** Whether photo mode holds the screen awake. Off lets the device time out normally. */
     var keepScreenOn: Boolean
         get() = prefs.getBoolean(KEY_KEEP_SCREEN_ON, true)
-        set(value) { prefs.edit().putBoolean(KEY_KEEP_SCREEN_ON, value).commit() }
+        set(value) {
+            prefs.edit().putBoolean(KEY_KEEP_SCREEN_ON, value).commit()
+        }
 
     /** Minutes since midnight, or [TIME_DISABLED]. */
     var wakeTimeMinutes: Int
         get() = prefs.getInt(KEY_WAKE_TIME, TIME_DISABLED)
-        set(value) { prefs.edit().putInt(KEY_WAKE_TIME, value).commit() }
+        set(value) {
+            prefs.edit().putInt(KEY_WAKE_TIME, value).commit()
+        }
 
     var sleepTimeMinutes: Int
         get() = prefs.getInt(KEY_SLEEP_TIME, TIME_DISABLED)
-        set(value) { prefs.edit().putInt(KEY_SLEEP_TIME, value).commit() }
+        set(value) {
+            prefs.edit().putInt(KEY_SLEEP_TIME, value).commit()
+        }
 
     var wakeTime: String?
         get() = TimeOfDay.format(wakeTimeMinutes)
-        set(value) { wakeTimeMinutes = TimeOfDay.parse(value) }
+        set(value) {
+            wakeTimeMinutes = TimeOfDay.parse(value)
+        }
 
     var sleepTime: String?
         get() = TimeOfDay.format(sleepTimeMinutes)
-        set(value) { sleepTimeMinutes = TimeOfDay.parse(value) }
+        set(value) {
+            sleepTimeMinutes = TimeOfDay.parse(value)
+        }
 }
 
 /**
@@ -108,7 +134,6 @@ object PhotoframePreferences {
  * are unit tested rather than discovered on a tablet.
  */
 object TimeOfDay {
-
     fun parse(value: String?): Int {
         val text = value?.trim().orEmpty()
         if (text.isEmpty()) return PhotoframePreferences.TIME_DISABLED
@@ -137,7 +162,6 @@ enum class TransitionEffect(val key: String) {
     ;
 
     companion object {
-        fun fromKey(key: String?): TransitionEffect =
-            entries.firstOrNull { it.key == key } ?: FADE
+        fun fromKey(key: String?): TransitionEffect = entries.firstOrNull { it.key == key } ?: FADE
     }
 }

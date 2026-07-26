@@ -49,9 +49,9 @@
 -keep class com.rober.photoframe.PhotoframeApp
 -keep class com.rober.photoframe.MainActivity
 -keep class com.rober.photoframe.boot.BootReceiver
--keep class com.rober.photoframe.alarm.AlarmReceiver
--keep class com.rober.photoframe.alarm.AlarmDismissReceiver
--keep class com.rober.photoframe.util.ScreenManager$AlarmReceiver
+-keep class com.rober.photoframe.schedule.AlarmReceiver
+-keep class com.rober.photoframe.schedule.AlarmDismissReceiver
+-keep class com.rober.photoframe.schedule.DailySchedule$ScheduleReceiver
 
 # Custom views inflated from layout XML need their two/three-arg constructors.
 -keepclasseswithmembers class * extends android.view.View {

@@ -10,7 +10,6 @@ import kotlin.random.Random
  * to get subtly wrong — can be unit tested without a device.
  */
 object PlaylistBuilder {
-
     /** How many times a favourited photo appears in a shuffled playlist. */
     const val FAVORITE_WEIGHT = 3
 
@@ -37,9 +36,10 @@ object PlaylistBuilder {
             return library.sortedWith(NATURAL_NAME_ORDER)
         }
 
-        val weights = library.associate { item ->
-            item.documentId to if (item.documentId in favoriteIds) FAVORITE_WEIGHT else 1
-        }
+        val weights =
+            library.associate { item ->
+                item.documentId to if (item.documentId in favoriteIds) FAVORITE_WEIGHT else 1
+            }
 
         return interleave(library.shuffled(random), weights)
     }
@@ -93,7 +93,10 @@ object PlaylistBuilder {
     internal val NATURAL_NAME_ORDER: Comparator<MediaItem> =
         Comparator { a, b -> compareNatural(a.name, b.name) }
 
-    internal fun compareNatural(left: String, right: String): Int {
+    internal fun compareNatural(
+        left: String,
+        right: String,
+    ): Int {
         var i = 0
         var j = 0
         while (i < left.length && j < right.length) {

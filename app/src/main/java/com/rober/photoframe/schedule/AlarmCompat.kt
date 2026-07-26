@@ -1,4 +1,4 @@
-package com.rober.photoframe.util
+package com.rober.photoframe.schedule
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -24,7 +24,6 @@ import android.util.Log
  * API 23, so on 22 there is nothing for an alarm to be held back by in the first place.
  */
 object AlarmCompat {
-
     private const val TAG = "AlarmCompat"
 
     /**
@@ -38,8 +37,9 @@ object AlarmCompat {
         windowMillis: Long,
         allowInexact: Boolean = true,
     ) {
-        val exactPermitted = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
-            alarmManager.canScheduleExactAlarms()
+        val exactPermitted =
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+                alarmManager.canScheduleExactAlarms()
 
         try {
             when {

@@ -5,10 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.rober.photoframe.MainActivity
-import com.rober.photoframe.alarm.AlarmScheduler
 import com.rober.photoframe.data.AlarmSettings
+import com.rober.photoframe.schedule.AlarmScheduler
+import com.rober.photoframe.schedule.DailySchedule
 import com.rober.photoframe.settings.PhotoframePreferences
-import com.rober.photoframe.util.ScreenManager
 
 /**
  * Restores the schedule after a reboot.
@@ -18,12 +18,14 @@ import com.rober.photoframe.util.ScreenManager
  * unattended photo frame runs into.
  */
 class BootReceiver : BroadcastReceiver() {
-
     private companion object {
         const val TAG = "BootReceiver"
     }
 
-    override fun onReceive(context: Context, intent: Intent) {
+    override fun onReceive(
+        context: Context,
+        intent: Intent,
+    ) {
         val action = intent.action
         if (action != Intent.ACTION_BOOT_COMPLETED &&
             action != Intent.ACTION_MY_PACKAGE_REPLACED &&
@@ -36,7 +38,7 @@ class BootReceiver : BroadcastReceiver() {
         PhotoframePreferences.init(context)
         AlarmSettings.init(context)
 
-        ScreenManager.scheduleAlarms(context)
+        DailySchedule.scheduleAlarms(context)
         AlarmSettings.get()?.takeIf { it.enabled }?.let { AlarmScheduler.schedule(context, it) }
 
         if (!PhotoframePreferences.autoStartOnBoot) return

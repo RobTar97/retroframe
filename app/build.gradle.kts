@@ -3,14 +3,26 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ktlint)
+}
+
+// Style is enforced rather than hoped for. Run ./gradlew ktlintFormat to fix most of it.
+ktlint {
+    android.set(true)
+    ignoreFailures.set(false)
+    filter {
+        // Generated sources are not ours to style.
+        exclude { it.file.path.contains("/build/") }
+    }
 }
 
 // Release signing is optional: the project must stay buildable by anyone who clones it.
 // Create keystore.properties (gitignored) to produce signed release builds.
 val keystorePropsFile = rootProject.file("keystore.properties")
-val keystoreProps = Properties().apply {
-    if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
-}
+val keystoreProps =
+    Properties().apply {
+        if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
+    }
 
 android {
     namespace = "com.rober.photoframe"
@@ -89,31 +101,33 @@ android {
 
     packaging {
         resources {
-            excludes += setOf(
-                "/META-INF/{AL2.0,LGPL2.1}",
-                "/META-INF/DEPENDENCIES",
-                "DebugProbesKt.bin",
-                "kotlin-tooling-metadata.json",
-            )
+            excludes +=
+                setOf(
+                    "/META-INF/{AL2.0,LGPL2.1}",
+                    "/META-INF/DEPENDENCIES",
+                    "DebugProbesKt.bin",
+                    "kotlin-tooling-metadata.json",
+                )
         }
     }
 
     lint {
         warningsAsErrors = false
         abortOnError = true
-        disable += setOf(
-            "GradleDependency",
-            "ObsoleteLintCustomCheck",
-            // commit() over apply() is a deliberate, documented choice here: a photo frame
-            // loses power abruptly, and an async write that has not reached disk is a
-            // setting the user has to enter again. See PhotoframePreferences.
-            "ApplySharedPref",
-            // Same reason. The KTX SharedPreferences.edit {} helper defaults to apply(),
-            // so adopting it would either silently change that behaviour or require
-            // edit(commit = true) at every call site. The explicit .commit() is clearer
-            // about the one property that matters here.
-            "UseKtx",
-        )
+        disable +=
+            setOf(
+                "GradleDependency",
+                "ObsoleteLintCustomCheck",
+                // commit() over apply() is a deliberate, documented choice here: a photo frame
+                // loses power abruptly, and an async write that has not reached disk is a
+                // setting the user has to enter again. See PhotoframePreferences.
+                "ApplySharedPref",
+                // Same reason. The KTX SharedPreferences.edit {} helper defaults to apply(),
+                // so adopting it would either silently change that behaviour or require
+                // edit(commit = true) at every call site. The explicit .commit() is clearer
+                // about the one property that matters here.
+                "UseKtx",
+            )
     }
 }
 

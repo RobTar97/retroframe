@@ -8,11 +8,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.rober.photoframe.data.FavoritesManager
+import com.rober.photoframe.data.FolderMonitor
 import com.rober.photoframe.data.PhotoRepository
 import com.rober.photoframe.data.PlaylistBuilder
 import com.rober.photoframe.model.MediaItem
 import com.rober.photoframe.settings.PhotoframePreferences
-import com.rober.photoframe.util.FolderMonitor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -24,8 +24,11 @@ import kotlinx.coroutines.launch
 /** What the slideshow screen should currently be showing. */
 sealed interface SlideshowState {
     data object Loading : SlideshowState
+
     data object NoFolderSelected : SlideshowState
+
     data object FolderEmpty : SlideshowState
+
     data class Ready(val playlist: List<MediaItem>) : SlideshowState
 }
 
@@ -44,7 +47,6 @@ sealed interface SlideshowState {
  * coroutine that had just fired it.
  */
 class SlideshowViewModel(application: Application) : AndroidViewModel(application) {
-
     private val repository = PhotoRepository(application)
     private val folderMonitor = FolderMonitor(application, repository)
 
@@ -58,11 +60,12 @@ class SlideshowViewModel(application: Application) : AndroidViewModel(applicatio
      * Emitted when the pager should move to the next slide. Conflated: if the UI is briefly
      * unable to keep up there is no value in queuing several advances.
      */
-    private val _advanceRequests = MutableSharedFlow<Unit>(
-        replay = 0,
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
+    private val _advanceRequests =
+        MutableSharedFlow<Unit>(
+            replay = 0,
+            extraBufferCapacity = 1,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
     val advanceRequests: SharedFlow<Unit> = _advanceRequests
 
     private var library: List<MediaItem> = emptyList()
@@ -78,37 +81,39 @@ class SlideshowViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun reload() {
         loadJob?.cancel()
-        loadJob = viewModelScope.launch {
-            val uriString = PhotoframePreferences.galleryUriString
-            if (uriString.isNullOrEmpty()) {
-                _state.value = SlideshowState.NoFolderSelected
-                return@launch
+        loadJob =
+            viewModelScope.launch {
+                val uriString = PhotoframePreferences.galleryUriString
+                if (uriString.isNullOrEmpty()) {
+                    _state.value = SlideshowState.NoFolderSelected
+                    return@launch
+                }
+
+                val treeUri = uriString.toUri()
+
+                // The saved URI can outlive the grant that made it usable: a cloud restore onto
+                // a new device, a permission revoked in system settings, or an SD card pulled
+                // out. Without this check the app sits on an empty screen insisting it has a
+                // folder; with it, the user is simply asked to pick one again.
+                if (!hasPersistedAccess(treeUri)) {
+                    PhotoframePreferences.galleryUriString = null
+                    _state.value = SlideshowState.NoFolderSelected
+                    return@launch
+                }
+                library = repository.scan(treeUri, PhotoframePreferences.includeVideos)
+
+                // Forget favourites whose photos are gone, so the set cannot grow without bound.
+                FavoritesManager.retainOnly(library.mapTo(HashSet(library.size)) { it.documentId })
+
+                _state.value =
+                    if (library.isEmpty()) {
+                        SlideshowState.FolderEmpty
+                    } else {
+                        SlideshowState.Ready(buildPlaylist())
+                    }
+
+                if (library.isNotEmpty()) restartTimer()
             }
-
-            val treeUri = uriString.toUri()
-
-            // The saved URI can outlive the grant that made it usable: a cloud restore onto
-            // a new device, a permission revoked in system settings, or an SD card pulled
-            // out. Without this check the app sits on an empty screen insisting it has a
-            // folder; with it, the user is simply asked to pick one again.
-            if (!hasPersistedAccess(treeUri)) {
-                PhotoframePreferences.galleryUriString = null
-                _state.value = SlideshowState.NoFolderSelected
-                return@launch
-            }
-            library = repository.scan(treeUri, PhotoframePreferences.includeVideos)
-
-            // Forget favourites whose photos are gone, so the set cannot grow without bound.
-            FavoritesManager.retainOnly(library.mapTo(HashSet(library.size)) { it.documentId })
-
-            _state.value = if (library.isEmpty()) {
-                SlideshowState.FolderEmpty
-            } else {
-                SlideshowState.Ready(buildPlaylist())
-            }
-
-            if (library.isNotEmpty()) restartTimer()
-        }
     }
 
     /** Rebuilds the playlist from the already-scanned library — no disk or IPC work. */
@@ -117,11 +122,12 @@ class SlideshowViewModel(application: Application) : AndroidViewModel(applicatio
         _state.value = SlideshowState.Ready(buildPlaylist())
     }
 
-    private fun buildPlaylist(): List<MediaItem> = PlaylistBuilder.build(
-        library = library,
-        favoriteIds = FavoritesManager.snapshot(),
-        shuffle = PhotoframePreferences.shuffle,
-    )
+    private fun buildPlaylist(): List<MediaItem> =
+        PlaylistBuilder.build(
+            library = library,
+            favoriteIds = FavoritesManager.snapshot(),
+            shuffle = PhotoframePreferences.shuffle,
+        )
 
     private fun hasPersistedAccess(treeUri: Uri): Boolean =
         getApplication<Application>().contentResolver.persistedUriPermissions.any {
@@ -185,16 +191,18 @@ class SlideshowViewModel(application: Application) : AndroidViewModel(applicatio
 
     private fun restartTimer() {
         stopTimer()
-        val intervalMs = PhotoframePreferences.slideIntervalSeconds
-            .coerceAtLeast(PhotoframePreferences.MIN_INTERVAL_SECONDS) * 1000L
+        val intervalMs =
+            PhotoframePreferences.slideIntervalSeconds
+                .coerceAtLeast(PhotoframePreferences.MIN_INTERVAL_SECONDS) * 1000L
 
-        timerJob = viewModelScope.launch {
-            while (isActive) {
-                delay(intervalMs)
-                if (_isPlaying.value != true) break
-                _advanceRequests.tryEmit(Unit)
+        timerJob =
+            viewModelScope.launch {
+                while (isActive) {
+                    delay(intervalMs)
+                    if (_isPlaying.value != true) break
+                    _advanceRequests.tryEmit(Unit)
+                }
             }
-        }
     }
 
     private fun stopTimer() {

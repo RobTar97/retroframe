@@ -3,22 +3,19 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!--
-      RetroFrame makes no network requests. INTERNET and ACCESS_NETWORK_STATE were declared
-      by an earlier version for a weather feature that was removed; they are deliberately
-      absent so the "this app cannot phone home" claim is enforced by the manifest and not
-      merely by the code.
+      RetroFrame makes no network requests, and this file is where that is enforced rather
+      than merely claimed.
 
-      READ_EXTERNAL_STORAGE is likewise absent. Media is read through the Storage Access
-      Framework, which grants access to exactly the one folder the user picks.
-    -->
+      INTERNET is absent, so the OS will not let the app open a socket even if some future
+      change tried to. READ_EXTERNAL_STORAGE is absent too: media is read through the Storage
+      Access Framework, which grants exactly the one folder the user picks and nothing else.
 
-    <!--
-      Media3 injects ACCESS_NETWORK_STATE into the merged manifest for adaptive streaming.
-      RetroFrame only ever plays local files, so it is stripped back out. It grants no
-      ability to open a socket on its own — INTERNET does that, and is absent — but leaving
-      it in would put a network permission in the installed app and make the project's
-      "no network access" claim untrue on inspection. Verified with:
+      ACCESS_NETWORK_STATE has to be actively removed rather than simply not declared —
+      Media3 injects it for adaptive streaming, which this app never does. It grants no
+      socket access by itself, but leaving it in would place a network permission in the
+      installed app and make the project's claim false on inspection. Check with:
           adb shell dumpsys package com.rober.photoframe
+      The installed app should list exactly four permissions.
     -->
     <uses-permission
         android:name="android.permission.ACCESS_NETWORK_STATE"
@@ -90,7 +87,7 @@
         </receiver>
 
         <receiver
-            android:name=".util.ScreenManager$AlarmReceiver"
+            android:name=".schedule.DailySchedule$ScheduleReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -100,7 +97,7 @@
         </receiver>
 
         <receiver
-            android:name=".alarm.AlarmReceiver"
+            android:name=".schedule.AlarmReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -109,7 +106,7 @@
         </receiver>
 
         <receiver
-            android:name=".alarm.AlarmDismissReceiver"
+            android:name=".schedule.AlarmDismissReceiver"
             android:enabled="true"
             android:exported="false" />
 

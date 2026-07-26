@@ -20,7 +20,6 @@ import com.rober.photoframe.R
  * So: say what is about to happen, and say which folder to pick.
  */
 class WelcomeDialogFragment : DialogFragment() {
-
     /** Invoked when the user is ready to choose a folder. */
     var onContinue: (() -> Unit)? = null
 
@@ -30,7 +29,10 @@ class WelcomeDialogFragment : DialogFragment() {
         savedInstanceState: Bundle?,
     ): View = inflater.inflate(R.layout.dialog_welcome, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         isCancelable = false
         view.findViewById<View>(R.id.btnWelcomeContinue).setOnClickListener {

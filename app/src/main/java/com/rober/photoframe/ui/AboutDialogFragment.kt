@@ -3,8 +3,6 @@ package com.rober.photoframe.ui
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageInfo
-import android.net.Uri
-import androidx.core.net.toUri
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,6 +12,7 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import com.rober.photoframe.R
 
@@ -28,14 +27,16 @@ import com.rober.photoframe.R
  * It is also what F-Droid and Play both expect to find.
  */
 class AboutDialogFragment : DialogFragment() {
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View = inflater.inflate(R.layout.dialog_about, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         view.findViewById<TextView>(R.id.aboutVersion).text =
@@ -69,11 +70,12 @@ class AboutDialogFragment : DialogFragment() {
         }
     }
 
-    private fun packageInfo(): PackageInfo? = try {
-        requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
-    } catch (e: Exception) {
-        null
-    }
+    private fun packageInfo(): PackageInfo? =
+        try {
+            requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
+        } catch (e: Exception) {
+            null
+        }
 
     private fun versionName(): String = packageInfo()?.versionName ?: "?"
 

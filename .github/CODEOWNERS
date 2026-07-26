@@ -1,0 +1,17 @@
+# Default owner for everything in the repository.
+* @RobTar97
+
+# Areas where a mistake is expensive and a second look is worth the delay:
+
+# Signing, minification and the SDK floor. minSdk 22 is the premise of the project —
+# see the CEILING notes in gradle/libs.versions.toml before changing versions.
+/app/build.gradle.kts        @RobTar97
+/gradle/libs.versions.toml   @RobTar97
+/app/proguard-rules.pro      @RobTar97
+
+# Permissions and manifest-registered components. The app's privacy claim is enforced
+# here, and receivers are referenced by class name.
+/app/src/main/AndroidManifest.xml  @RobTar97
+
+# Anything that publishes or deploys.
+/.github/workflows/          @RobTar97
