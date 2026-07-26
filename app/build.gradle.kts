@@ -35,7 +35,9 @@ android {
     signingConfigs {
         if (keystorePropsFile.exists()) {
             create("release") {
-                storeFile = file(keystoreProps.getProperty("storeFile"))
+                // rootProject.file, not file(): paths in keystore.properties are relative to
+                // the repository root, but file() would resolve them inside app/.
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
                 storePassword = keystoreProps.getProperty("storePassword")
                 keyAlias = keystoreProps.getProperty("keyAlias")
                 keyPassword = keystoreProps.getProperty("keyPassword")
