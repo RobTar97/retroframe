@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_horizontal"
+            android:text="@string/welcome_title"
+            android:textColor="@android:color/black"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:lineSpacingMultiplier="1.15"
+            android:text="@string/welcome_body"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
+
+        <!-- The part people get stuck on, called out rather than buried. -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:background="#FFF3CD"
+            android:lineSpacingMultiplier="1.15"
+            android:padding="14dp"
+            android:text="@string/welcome_warning"
+            android:textColor="#664D03"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/btnWelcomeContinue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="60dp"
+            android:text="@string/welcome_continue"
+            android:textSize="17sp" />
+
+    </LinearLayout>
+</ScrollView>

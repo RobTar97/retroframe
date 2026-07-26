@@ -25,6 +25,7 @@ object PhotoframePreferences {
     private const val KEY_WAKE_TIME = "wake_time"
     private const val KEY_SLEEP_TIME = "sleep_time"
     private const val KEY_KEEP_SCREEN_ON = "keep_screen_on"
+    private const val KEY_SEEN_WELCOME = "seen_welcome"
 
     const val MIN_INTERVAL_SECONDS = 5
     const val MAX_INTERVAL_SECONDS = 3600
@@ -71,6 +72,11 @@ object PhotoframePreferences {
     var videoSoundEnabled: Boolean
         get() = prefs.getBoolean(KEY_VIDEO_SOUND, false)
         set(value) { prefs.edit().putBoolean(KEY_VIDEO_SOUND, value).commit() }
+
+    /** The first-run explanation is shown once, before the folder picker. */
+    var hasSeenWelcome: Boolean
+        get() = prefs.getBoolean(KEY_SEEN_WELCOME, false)
+        set(value) { prefs.edit().putBoolean(KEY_SEEN_WELCOME, value).commit() }
 
     /** Whether photo mode holds the screen awake. Off lets the device time out normally. */
     var keepScreenOn: Boolean

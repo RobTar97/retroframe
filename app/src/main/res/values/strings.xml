@@ -1,9 +1,15 @@
 <resources>
     <string name="app_name">RetroFrame</string>
 
+    <!-- First run -->
+    <string name="welcome_title">Let\'s find your photos</string>
+    <string name="welcome_body">RetroFrame shows the photos from one folder on this device. Next you\'ll see Android\'s folder browser — open the folder your photos are in, then tap <b>Use this folder</b>.\n\nIf you haven\'t copied any photos across yet, <b>Pictures</b> or <b>DCIM</b> are the usual places.</string>
+    <string name="welcome_warning">Android won\'t let any app use the top level of your storage, or the Downloads folder. If you see “Can\'t use this folder”, open a folder inside it and try again.</string>
+    <string name="welcome_continue">Choose the folder</string>
+
     <!-- Empty states -->
-    <string name="empty_no_folder">No folder selected.\n\nTap Choose folder to pick where your photos live.</string>
-    <string name="empty_folder">No photos or videos found in this folder.\n\nTap Choose folder to pick a different one.</string>
+    <string name="empty_no_folder">No folder chosen yet.\n\nTap Choose folder, then open the folder your photos are in and tap “Use this folder”.</string>
+    <string name="empty_folder">That folder has no photos or videos in it.\n\nRetroFrame only reads the folder you picked, not the ones inside it — so choose the folder the pictures are actually in.</string>
     <string name="select_folder">Choose folder</string>
 
     <!-- Favourites -->

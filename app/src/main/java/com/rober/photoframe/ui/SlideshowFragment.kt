@@ -1,7 +1,9 @@
 package com.rober.photoframe.ui
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -85,8 +87,46 @@ class SlideshowFragment :
         observeViewModel()
 
         if (PhotoframePreferences.galleryUriString == null) {
-            folderPicker.launch(null)
+            startFolderSelection()
         }
+    }
+
+    /**
+     * First run gets an explanation; afterwards the picker opens directly.
+     */
+    private fun startFolderSelection() {
+        if (PhotoframePreferences.hasSeenWelcome) {
+            openFolderPicker()
+            return
+        }
+        if (parentFragmentManager.findFragmentByTag(WelcomeDialogFragment.TAG) != null) return
+
+        PhotoframePreferences.hasSeenWelcome = true
+        WelcomeDialogFragment().apply {
+            onContinue = { openFolderPicker() }
+        }.show(parentFragmentManager, WelcomeDialogFragment.TAG)
+    }
+
+    /**
+     * Opens the system picker already inside a folder Android is willing to grant.
+     *
+     * Launching with no starting point drops the user at the top of storage, which Android 11
+     * and newer refuse outright — as does Downloads. Starting in Pictures means the common
+     * case needs one tap and never shows a refusal. Devices below API 26 ignore the hint and
+     * behave as before, which is fine because they have no such restriction.
+     */
+    private fun openFolderPicker() {
+        val start = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            runCatching {
+                DocumentsContract.buildDocumentUri(
+                    EXTERNAL_STORAGE_AUTHORITY,
+                    "primary:$PREFERRED_START_FOLDER",
+                )
+            }.getOrNull()
+        } else {
+            null
+        }
+        folderPicker.launch(start)
     }
 
     // ------------------------------------------------------------------ pager
@@ -212,7 +252,7 @@ class SlideshowFragment :
             showControls()
         }
 
-        btnSelectFolder.setOnClickListener { folderPicker.launch(null) }
+        btnSelectFolder.setOnClickListener { startFolderSelection() }
     }
 
     /**
@@ -280,7 +320,7 @@ class SlideshowFragment :
     private fun showSettings() {
         SettingsDialogFragment().apply {
             onSettingsSaved = { viewModel.onSettingsChanged(folderChanged = false) }
-            onChangeFolderRequested = { folderPicker.launch(null) }
+            onChangeFolderRequested = { openFolderPicker() }
         }.show(parentFragmentManager, "settings")
     }
 
@@ -378,5 +418,14 @@ class SlideshowFragment :
 
     private companion object {
         const val CONTROLS_TIMEOUT_MS = 3_000L
+
+        /** Android's own provider for the built-in storage volume. */
+        const val EXTERNAL_STORAGE_AUTHORITY = "com.android.externalstorage.documents"
+
+        /**
+         * Where the picker opens. Pictures exists on every Android device, is never one of
+         * the folders the system refuses, and is where a PC's file browser puts photos.
+         */
+        const val PREFERRED_START_FOLDER = "Pictures"
     }
 }
