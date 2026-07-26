@@ -1,29 +1,42 @@
+# ============================================================================
+# CEILINGS — read before bumping anything
+#
+# RetroFrame supports minSdk 22 (Android 5.1) on purpose: that is the oldest
+# version worth rescuing a tablet from, and it is the whole premise of the
+# project. AndroidX has since moved its own floor to minSdk 23, so several
+# libraries below are pinned BELOW their latest release and cannot be raised
+# without abandoning Android 5.1.
+#
+# Anything marked CEILING has been tested and fails. Don't re-litigate it
+# without deciding the minSdk question first — see docs/KNOWN_ISSUES.md.
+# ============================================================================
+
 [versions]
-agp = "8.9.1"
-kotlin = "2.0.21"
+agp = "8.9.1"                # CEILING: Gradle 9.x needs AGP 8.13+; 8.9.1 crashes on it
+kotlin = "2.4.10"
 
 # AndroidX
-coreKtx = "1.13.1"          # last version supporting minSdk 22 comfortably
-appcompat = "1.7.0"
-material = "1.12.0"
-constraintlayout = "2.1.4"
-fragment = "1.8.5"
-lifecycle = "2.8.7"
+coreKtx = "1.16.0"           # CEILING: 1.19.0 requires compileSdk 37
+appcompat = "1.7.1"
+material = "1.12.0"          # CEILING: 1.14.0 requires minSdk 23
+constraintlayout = "2.2.1"
+fragment = "1.8.5"           # CEILING: 1.8.9 pulls savedstate 1.4.0, which needs minSdk 23
+lifecycle = "2.8.7"          # CEILING: 2.11.0 pulls savedstate 1.4.0, which needs minSdk 23
 viewpager2 = "1.1.0"
-recyclerview = "1.3.2"
-documentfile = "1.0.1"
-media3 = "1.4.1"            # supports minSdk 21; successor to ExoPlayer2
+recyclerview = "1.4.0"
+documentfile = "1.1.0"
+media3 = "1.6.1"             # CEILING: 1.10.1 requires minSdk 23
 
 # Third party
 glide = "4.16.0"
 photoview = "2.3.0"
-coroutines = "1.8.1"
+coroutines = "1.11.0"
 
 # Test
 junit = "4.13.2"
-androidxJunit = "1.2.1"
-espresso = "3.6.1"
-robolectric = "4.13"
+androidxJunit = "1.3.0"
+espresso = "3.7.0"
+robolectric = "4.16.1"       # Tests pin sdk = [35]; SDK 36 shadows require Java 21
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
