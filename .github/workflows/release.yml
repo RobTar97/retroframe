@@ -1,0 +1,141 @@
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build, e.g. v0.2.1'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      # Everything must pass before anything is signed. A broken release is worse than a
+      # late one, and people sideloading an APK have no store to roll them back.
+      - name: Verify
+        run: ./gradlew testDebugUnitTest ktlintCheck lintDebug --stacktrace
+
+      - name: Restore signing keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::error::RELEASE_KEYSTORE secret is not set. See docs/PUBLISHING.md."
+            exit 1
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > retroframe-release.jks
+          cat > keystore.properties <<EOF
+          storeFile=retroframe-release.jks
+          storePassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.RELEASE_KEY_ALIAS }}
+          keyPassword=${{ secrets.RELEASE_KEY_PASSWORD }}
+          EOF
+
+      - name: Build signed release
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Name the artefact and checksum it
+        id: artefact
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          APK="retroframe-${TAG}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "$APK"
+          SHA=$(sha256sum "$APK" | cut -d' ' -f1)
+          echo "$SHA  $APK" > "${APK}.sha256"
+          echo "apk=$APK"   >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA"   >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG"   >> "$GITHUB_OUTPUT"
+          echo "size=$(du -h "$APK" | cut -f1)" >> "$GITHUB_OUTPUT"
+
+      # Confirms the APK is signed with the key we expect, not merely signed.
+      - name: Verify the signature
+        run: |
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$BT/apksigner" verify --print-certs "${{ steps.artefact.outputs.apk }}" \
+            | tee certs.txt
+          grep -q "SHA-256 digest: ${{ secrets.RELEASE_CERT_SHA256 }}" certs.txt || {
+            echo "::error::Signing certificate does not match RELEASE_CERT_SHA256."
+            echo "::error::Users could not upgrade over an existing install."
+            exit 1
+          }
+
+      # Always destroy the key material, including when a step above failed.
+      - name: Shred signing material
+        if: always()
+        run: shred -u retroframe-release.jks keystore.properties 2>/dev/null || true
+
+      - name: Extract this version's changelog
+        id: notes
+        run: |
+          TAG="${{ steps.artefact.outputs.tag }}"
+          VERSION="${TAG#v}"
+          # Pull the section for this version out of CHANGELOG.md, if it has one.
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\]" { found=1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "No changelog section for $VERSION — see CHANGELOG.md." > notes.md
+          fi
+          cat >> notes.md <<EOF
+
+          ---
+
+          ### Install
+
+          Copy the APK to your tablet and open it, allowing installation from unknown sources
+          when asked. Or over USB: \`adb install -r ${{ steps.artefact.outputs.apk }}\`
+
+          Requires **Android 5.1 (API 22) or newer**. Any architecture — no native code.
+          New to this? See the [setup guide](https://github.com/RobTar97/retroframe/blob/main/docs/GETTING_STARTED.md).
+
+          ### Verify what you're installing
+
+          \`\`\`
+          SHA-256  ${{ steps.artefact.outputs.sha }}
+          \`\`\`
+
+          Built and signed by [this workflow](https://github.com/RobTar97/retroframe/actions/runs/${{ github.run_id }}) from tag \`$TAG\`.
+
+          ### Privacy
+
+          No account, no cloud, no analytics, and no network access of any kind — the app does
+          not declare the \`INTERNET\` permission, and a test in CI asserts it never will.
+          EOF
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.artefact.outputs.tag }}
+          name: ${{ steps.artefact.outputs.tag }}
+          body_path: notes.md
+          draft: false
+          prerelease: ${{ contains(steps.artefact.outputs.tag, '-') }}
+          files: |
+            ${{ steps.artefact.outputs.apk }}
+            ${{ steps.artefact.outputs.apk }}.sha256

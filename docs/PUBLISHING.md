@@ -21,6 +21,34 @@ None of the channels below are reachable until these are done. All are tracked i
 - [x] ~~Create a signing keystore and wire up `keystore.properties`~~ — done; keep `retroframe-release.jks` backed up off this machine
 - [ ] Decide on a `versionCode` / `versionName` scheme and bump from 0.2.0
 
+### Releases are automated
+
+Push a tag matching `v*` and `.github/workflows/release.yml` builds it, signs it from
+repository secrets, verifies the signing certificate matches the expected fingerprint,
+generates the SHA-256, extracts that version's section from `CHANGELOG.md`, and publishes the
+release. Tags containing a hyphen (`v0.3.0-rc1`) publish as prereleases.
+
+Five secrets are required, all already set:
+
+| Secret | What it is |
+|---|---|
+| `RELEASE_KEYSTORE` | base64 of `retroframe-release.jks` |
+| `RELEASE_KEYSTORE_PASSWORD` | keystore password |
+| `RELEASE_KEY_ALIAS` | `retroframe` |
+| `RELEASE_KEY_PASSWORD` | key password |
+| `RELEASE_CERT_SHA256` | expected certificate fingerprint — the build fails if the APK is signed with anything else |
+
+That last one matters more than it looks. Signing with the wrong key produces an APK that
+installs fine on a clean device and **cannot upgrade an existing install** — users would have
+to uninstall first, losing every setting. The check turns that into a failed build.
+
+The keystore is shredded from the runner at the end of the job, including when an earlier step
+failed.
+
+**Before tagging a release, bump `versionCode`.** F-Droid keys its changelogs by it, and
+Android refuses to install an APK whose `versionCode` is not higher than the installed one.
+Add a matching `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`.
+
 ### Signing
 
 Generate a keystore once and **never lose it**. On Google Play the upload key can be reset,
