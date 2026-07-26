@@ -26,7 +26,9 @@ import com.rober.photoframe.settings.SettingsDialogFragment
 import kotlinx.coroutines.launch
 
 @OptIn(UnstableApi::class)
-class SlideshowFragment : Fragment(R.layout.fragment_slideshow) {
+class SlideshowFragment :
+    Fragment(R.layout.fragment_slideshow),
+    MainActivity.ScreenTapListener {
 
     private val viewModel: SlideshowViewModel by viewModels()
 
@@ -34,6 +36,8 @@ class SlideshowFragment : Fragment(R.layout.fragment_slideshow) {
     private lateinit var adapter: SlideshowAdapter
     private lateinit var controlsOverlay: View
     private lateinit var emptyState: TextView
+    private lateinit var btnSelectFolder: View
+    private lateinit var topOverlay: View
     private lateinit var btnPlayPause: ImageButton
     private lateinit var btnFavorite: ImageButton
 
@@ -68,6 +72,8 @@ class SlideshowFragment : Fragment(R.layout.fragment_slideshow) {
         viewPager = view.findViewById(R.id.viewPager)
         controlsOverlay = view.findViewById(R.id.controlsOverlay)
         emptyState = view.findViewById(R.id.emptyState)
+        btnSelectFolder = view.findViewById(R.id.btnSelectFolder)
+        topOverlay = view.findViewById(R.id.topOverlay)
         btnPlayPause = view.findViewById(R.id.btnPlayPause)
         btnFavorite = view.findViewById(R.id.btnFavorite)
 
@@ -86,7 +92,7 @@ class SlideshowFragment : Fragment(R.layout.fragment_slideshow) {
     // ------------------------------------------------------------------ pager
 
     private fun setUpPager() {
-        adapter = SlideshowAdapter(requireContext()) { toggleControls() }
+        adapter = SlideshowAdapter(requireContext())
 
         viewPager.adapter = adapter
         viewPager.setPageTransformer(
@@ -97,9 +103,14 @@ class SlideshowFragment : Fragment(R.layout.fragment_slideshow) {
         // 1 GB device should be asked to hold decoded.
         viewPager.offscreenPageLimit = 1
 
+        val recycler = viewPager.getChildAt(0) as? RecyclerView
+
         // Disable the over-scroll glow: it allocates a bitmap and never looks right against
         // a photo bleeding to the screen edge.
-        (viewPager.getChildAt(0) as? RecyclerView)?.overScrollMode = View.OVER_SCROLL_NEVER
+        recycler?.overScrollMode = View.OVER_SCROLL_NEVER
+
+        // Tap-to-reveal is driven by MainActivity.dispatchTouchEvent, which is the only layer
+        // PhotoView cannot cut out of the touch stream. See onScreenTapped below.
 
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
@@ -162,8 +173,6 @@ class SlideshowFragment : Fragment(R.layout.fragment_slideshow) {
     // --------------------------------------------------------------- controls
 
     private fun setUpControls(view: View) {
-        view.findViewById<View>(R.id.topOverlay).setOnClickListener { toggleControls() }
-
         view.findViewById<ImageButton>(R.id.btnSettings).setOnClickListener {
             showSettings()
             showControls()
@@ -203,9 +212,27 @@ class SlideshowFragment : Fragment(R.layout.fragment_slideshow) {
             showControls()
         }
 
-        view.findViewById<View>(R.id.btnSelectFolder).setOnClickListener {
-            folderPicker.launch(null)
-        }
+        btnSelectFolder.setOnClickListener { folderPicker.launch(null) }
+    }
+
+    /**
+     * A bare tap anywhere on the screen shows or hides the controls — except when it lands on
+     * the chrome itself, where the buttons have already handled it and toggling as well would
+     * make every button press also dismiss the bar it lives on.
+     */
+    override fun onScreenTapped(rawX: Int, rawY: Int) {
+        if (!isAdded) return
+        if (controlsOverlay.visibility == View.VISIBLE && hits(controlsOverlay, rawX, rawY)) return
+        if (hits(topOverlay, rawX, rawY)) return
+        if (btnSelectFolder.visibility == View.VISIBLE && hits(btnSelectFolder, rawX, rawY)) return
+        toggleControls()
+    }
+
+    private fun hits(target: View, rawX: Int, rawY: Int): Boolean {
+        val xy = IntArray(2)
+        target.getLocationOnScreen(xy)
+        return rawX >= xy[0] && rawX <= xy[0] + target.width &&
+            rawY >= xy[1] && rawY <= xy[1] + target.height
     }
 
     private fun toggleControls() = setControlsVisible(controlsOverlay.visibility != View.VISIBLE)
@@ -263,7 +290,7 @@ class SlideshowFragment : Fragment(R.layout.fragment_slideshow) {
         viewModel.state.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is SlideshowState.Ready -> {
-                    emptyState.visibility = View.GONE
+                    setEmptyVisible(false)
                     viewPager.visibility = View.VISIBLE
                     adapter.submitList(state.playlist)
                     // A fresh playlist means position 0 is now a different photo.
@@ -295,8 +322,19 @@ class SlideshowFragment : Fragment(R.layout.fragment_slideshow) {
         adapter.submitList(emptyList())
         viewPager.visibility = View.GONE
         emptyState.setText(messageRes)
-        emptyState.visibility = View.VISIBLE
+        setEmptyVisible(true)
         showControls()
+    }
+
+    /**
+     * The message and its button are one unit. They were previously toggled separately, and
+     * the button was never hidden — so "Choose folder" sat on top of every photo for the
+     * entire life of the slideshow.
+     */
+    private fun setEmptyVisible(visible: Boolean) {
+        val visibility = if (visible) View.VISIBLE else View.GONE
+        emptyState.visibility = visibility
+        btnSelectFolder.visibility = visibility
     }
 
     // ------------------------------------------------------------- lifecycle

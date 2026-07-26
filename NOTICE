@@ -1,0 +1,78 @@
+RetroFrame
+Copyright (C) 2025 RetroFrame contributors
+
+This program is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this
+program. If not, see <https://www.gnu.org/licenses/>.
+
+The complete source code is at https://github.com/RobTar97/retroframe
+
+
+================================================================================
+THIRD-PARTY COMPONENTS
+================================================================================
+
+RetroFrame bundles the following libraries. The same list is shown inside the app
+under Settings -> About RetroFrame, so that anyone who receives only the APK can
+see it too.
+
+--------------------------------------------------------------------------------
+AndroidX libraries — Apache License 2.0
+  androidx.core:core-ktx
+  androidx.appcompat:appcompat
+  androidx.constraintlayout:constraintlayout
+  androidx.fragment:fragment-ktx
+  androidx.lifecycle:lifecycle-viewmodel-ktx
+  androidx.lifecycle:lifecycle-runtime-ktx
+  androidx.lifecycle:lifecycle-livedata-ktx
+  androidx.viewpager2:viewpager2
+  androidx.recyclerview:recyclerview
+  androidx.documentfile:documentfile
+  Copyright The Android Open Source Project
+  https://www.apache.org/licenses/LICENSE-2.0
+
+--------------------------------------------------------------------------------
+Material Components for Android — Apache License 2.0
+  com.google.android.material:material
+  Copyright The Android Open Source Project
+  https://github.com/material-components/material-components-android
+
+--------------------------------------------------------------------------------
+AndroidX Media3 — Apache License 2.0
+  androidx.media3:media3-exoplayer
+  androidx.media3:media3-ui
+  androidx.media3:media3-common
+  Copyright The Android Open Source Project
+  https://github.com/androidx/media
+
+--------------------------------------------------------------------------------
+Glide — BSD 2-Clause, with portions under Apache License 2.0 and MIT
+  com.github.bumptech.glide:glide
+  Copyright Google, Inc. and Bump Technologies, Inc.
+  https://github.com/bumptech/glide/blob/master/LICENSE
+
+--------------------------------------------------------------------------------
+PhotoView — Apache License 2.0
+  com.github.chrisbanes:PhotoView
+  Copyright Chris Banes
+  https://github.com/Baseflow/PhotoView
+
+--------------------------------------------------------------------------------
+Kotlin standard library and kotlinx.coroutines — Apache License 2.0
+  org.jetbrains.kotlin:kotlin-stdlib
+  org.jetbrains.kotlinx:kotlinx-coroutines-android
+  Copyright JetBrains s.r.o. and Kotlin Programming Language contributors
+  https://github.com/JetBrains/kotlin
+
+================================================================================
+
+Application artwork (art/icon-source.png and the launcher icons derived from it)
+and the generated sample photographs used on the project website are original to
+this project and covered by the GPL-3.0 licence above.

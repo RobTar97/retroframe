@@ -39,10 +39,12 @@
         android:paddingHorizontal="32dp"
         android:text="@string/select_folder"
         android:textSize="18sp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/emptyState" />
+        app:layout_constraintTop_toBottomOf="@id/emptyState"
+        tools:visibility="visible" />
 
     <!-- Clock and date, always visible over the photo -->
     <LinearLayout

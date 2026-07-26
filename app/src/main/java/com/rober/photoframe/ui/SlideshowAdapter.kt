@@ -22,7 +22,6 @@ import com.rober.photoframe.model.MediaItem
 @OptIn(UnstableApi::class)
 class SlideshowAdapter(
     private val context: Context,
-    private val onItemClicked: () -> Unit,
 ) : RecyclerView.Adapter<SlideshowAdapter.SlideViewHolder>() {
 
     private var items: List<MediaItem> = emptyList()
@@ -65,26 +64,20 @@ class SlideshowAdapter(
         val playerView: PlayerView = itemView.findViewById(R.id.playerView)
 
         fun bind(item: MediaItem) {
-            itemView.setOnClickListener { onItemClicked() }
-
+            // Taps are not handled here. SlideshowFragment watches the pager's RecyclerView
+            // with a single GestureDetector, because PhotoView swallows taps that land inside
+            // the displayed image and per-page listeners therefore missed most of them.
             if (item.isVideo) {
                 imageView.visibility = View.GONE
                 ImageLoader.clear(context, imageView)
 
                 playerView.visibility = View.VISIBLE
                 playerView.useController = false
-                playerView.setOnClickListener { onItemClicked() }
                 // Playback starts only once this page becomes active — see
                 // SlideshowFragment.onPageSelected.
             } else {
                 playerView.visibility = View.GONE
                 imageView.visibility = View.VISIBLE
-
-                // PhotoView consumes touch events for pinch-zoom, so a plain click listener
-                // never fires; these are the hooks it exposes for taps that are not gestures.
-                imageView.setOnPhotoTapListener { _, _, _ -> onItemClicked() }
-                imageView.setOnViewTapListener { _, _, _ -> onItemClicked() }
-
                 ImageLoader.load(context, item.uri, imageView)
             }
         }

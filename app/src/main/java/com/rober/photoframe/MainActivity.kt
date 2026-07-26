@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -50,6 +52,40 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             MODE_CLOCK -> switchToClockMode()
             MODE_PHOTO -> switchToPhotoMode()
         }
+    }
+
+    /**
+     * Screen taps are detected here, at the very top of the dispatch chain.
+     *
+     * Lower layers cannot see them reliably: PhotoView calls
+     * `requestDisallowInterceptTouchEvent(true)` so it can own pinch and pan, which cuts the
+     * ViewPager's RecyclerView out of the touch stream entirely, and PhotoView's own tap
+     * callbacks do not fire for taps inside the displayed image. The result was that tapping
+     * a photo — nearly every tap a user makes — did nothing at all, and the controls could
+     * only be summoned from the black margins beside the picture.
+     *
+     * `dispatchTouchEvent` runs before any of that, so it always sees the gesture. Events are
+     * observed and passed straight on, so swiping, zooming and the control buttons are
+     * unaffected.
+     */
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        screenTaps.onTouchEvent(ev)
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private val screenTaps by lazy {
+        GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                (supportFragmentManager.findFragmentById(R.id.container) as? ScreenTapListener)
+                    ?.onScreenTapped(e.rawX.toInt(), e.rawY.toInt())
+                return false
+            }
+        })
+    }
+
+    /** Implemented by whichever fragment wants to know about bare screen taps. */
+    interface ScreenTapListener {
+        fun onScreenTapped(rawX: Int, rawY: Int)
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

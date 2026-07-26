@@ -16,6 +16,15 @@ Point it at a folder. It shows your photos. That's the whole app.
 
 **[retroframe website →](https://robtar97.github.io/retroframe/)**  ·  **[Download v0.2.0 (3.1 MB) →](https://github.com/RobTar97/retroframe/releases/latest)**
 
+<br>
+
+<img src="art/screenshots/slideshow.png" alt="A photo filling the screen, with the time and date in the corner" width="49%" />
+<img src="art/screenshots/controls.png" alt="The same photo with the control bar revealed along the bottom" width="49%" />
+<img src="art/screenshots/clock.png" alt="Clock mode: a large clock and date on a black screen" width="49%" />
+<img src="art/screenshots/settings.png" alt="The settings dialog" width="49%" />
+
+<sub>Captured on a 1280×800 tablet emulator. Real-hardware shots welcome.</sub>
+
 </div>
 
 ---

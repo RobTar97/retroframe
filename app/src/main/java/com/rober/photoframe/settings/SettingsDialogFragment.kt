@@ -20,6 +20,7 @@ import com.rober.photoframe.R
 import com.rober.photoframe.alarm.AlarmScheduler
 import com.rober.photoframe.data.Alarm
 import com.rober.photoframe.data.AlarmSettings
+import com.rober.photoframe.ui.AboutDialogFragment
 import com.rober.photoframe.util.ScreenManager
 
 class SettingsDialogFragment : DialogFragment() {
@@ -69,6 +70,10 @@ class SettingsDialogFragment : DialogFragment() {
             onChangeFolderRequested?.invoke()
             // Stays open deliberately: the picker returns here, and dismissing would drop
             // any other edits the user had already made.
+        }
+
+        view.findViewById<Button>(R.id.btnAbout).setOnClickListener {
+            AboutDialogFragment().show(parentFragmentManager, "about")
         }
 
         view.findViewById<Button>(R.id.btnCancel).setOnClickListener { dismiss() }
