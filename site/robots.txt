@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://robtar97.github.io/retroframe/sitemap.xml

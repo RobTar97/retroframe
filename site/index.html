@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RetroFrame — the tablet in your drawer still works</title>
+<meta name="description" content="Turn an old Android tablet into a private, offline digital photo frame. No account, no cloud, no tracking — it doesn't even have the INTERNET permission. Android 5.1+, free and open source.">
+<meta name="theme-color" content="#0E0B08">
+<link rel="icon" href="img/icon.png" type="image/png">
+<link rel="canonical" href="https://robtar97.github.io/retroframe/">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="RetroFrame — the tablet in your drawer still works">
+<meta property="og:description" content="Turn an old Android tablet into a private, offline digital photo frame. No account, no cloud, no tracking.">
+<meta property="og:image" content="https://robtar97.github.io/retroframe/img/icon.png">
+<meta property="og:url" content="https://robtar97.github.io/retroframe/">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "RetroFrame",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Android 5.1+",
+  "softwareVersion": "0.2.0",
+  "fileSize": "3.1MB",
+  "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Turn an old Android tablet into a private, offline digital photo frame.",
+  "url": "https://robtar97.github.io/retroframe/"
+}
+</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a class="brand" href="#top">
+      <img src="img/icon.png" alt="" width="28" height="28">
+      <span>RetroFrame</span>
+    </a>
+    <nav class="topbar__nav">
+      <a href="#setup">Set up</a>
+      <a href="#engineering">How it's built</a>
+      <a href="https://github.com/RobTar97/retroframe">Source</a>
+      <a class="btn btn--sm" href="#download">Download</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ───────────────────────── hero ───────────────────────── -->
+<section class="hero" id="top">
+  <div class="wrap hero__in">
+
+    <div class="hero__copy reveal">
+      <p class="eyebrow">Android 5.1 and up · 3.1 MB · GPL-3.0</p>
+      <h1 class="hero__title">The tablet in your&nbsp;drawer still&nbsp;works.</h1>
+      <p class="hero__lede">
+        It turns on. The battery is tired and the browser gave up years ago, but the
+        screen is fine. RetroFrame makes it a photo frame — pointed at one folder,
+        showing your photos, asking nothing of you.
+      </p>
+
+      <div class="hero__cta" id="download">
+        <a class="btn btn--primary" href="https://github.com/RobTar97/retroframe/releases/download/v0.2.0/retroframe-v0.2.0.apk">
+          Download the APK
+          <span class="btn__meta">v0.2.0 · 3.1 MB</span>
+        </a>
+        <a class="btn btn--ghost" href="https://github.com/RobTar97/retroframe">View the source</a>
+      </div>
+
+      <p class="hero__note">
+        No account. No cloud. No analytics. The app doesn't have the
+        <code>INTERNET</code> permission, so it <em>can't</em> phone home.
+      </p>
+    </div>
+
+    <!-- the signature: an actual working frame -->
+    <div class="hero__demo reveal" data-reveal-delay="120">
+      <div class="stage" id="stage">
+        <div class="tablet" id="tablet">
+          <div class="tablet__cam" aria-hidden="true"></div>
+          <div class="screen" id="screen" role="group" aria-label="Interactive preview of the RetroFrame slideshow. Tap to show the controls.">
+            <div class="screen__stack" id="stack">
+              <img src="img/photo-1.jpg" alt="" width="1280" height="960" class="is-on">
+              <img src="img/photo-2.jpg" alt="" width="1280" height="960" loading="lazy">
+              <img src="img/photo-3.jpg" alt="" width="1280" height="960" loading="lazy">
+              <img src="img/photo-4.jpg" alt="" width="1280" height="960" loading="lazy">
+              <img src="img/photo-5.jpg" alt="" width="1280" height="960" loading="lazy">
+            </div>
+
+            <div class="screen__clock">
+              <span id="demoDate">—</span>
+              <strong id="demoTime">—</strong>
+            </div>
+
+            <div class="screen__controls" id="controls" aria-hidden="true">
+              <button type="button" class="ctl" data-act="prev" aria-label="Previous photo">‹</button>
+              <button type="button" class="ctl ctl--big" data-act="play" aria-label="Pause slideshow">❚❚</button>
+              <button type="button" class="ctl" data-act="next" aria-label="Next photo">›</button>
+              <span class="ctl__spacer"></span>
+              <button type="button" class="ctl ctl--heart" data-act="fav" aria-label="Mark as favourite" aria-pressed="false">♥</button>
+            </div>
+
+            <button type="button" class="screen__hit" id="hit" aria-label="Show slideshow controls"></button>
+          </div>
+        </div>
+        <div class="stage__shelf" aria-hidden="true"></div>
+      </div>
+      <p class="stage__cap">Live preview — that's the real clock. Tap the screen.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ───────────────────────── honesty ───────────────────────── -->
+<section class="section section--tight">
+  <div class="wrap wrap--read">
+    <div class="candid reveal">
+      <p class="candid__tag">Before you install it</p>
+      <p class="candid__body">
+        <strong>This build has never run on a physical tablet.</strong> It compiles, passes
+        30&nbsp;unit tests, minifies cleanly and passes lint — but a green build only proves the
+        code is well-formed, not that a 2014 storage provider behaves the way it assumes.
+        It's published so that it <em>can</em> be tested.
+      </p>
+      <p class="candid__body">
+        Every known defect is written down in the open, including that one.
+      </p>
+      <div class="candid__acts">
+        <a class="btn btn--ghost btn--sm" href="https://github.com/RobTar97/retroframe/blob/main/docs/KNOWN_ISSUES.md">Read the known issues</a>
+        <a class="btn btn--ghost btn--sm" href="https://github.com/RobTar97/retroframe/issues/new?template=device_report.yml">Report what happened on yours</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── features ───────────────────────── -->
+<section class="section" id="features">
+  <div class="wrap">
+    <h2 class="h2 reveal">What it does</h2>
+    <div class="grid">
+      <article class="card reveal">
+        <h3>Shows one folder</h3>
+        <p>Point it at a folder — internal storage, an SD card, a USB stick. It reads that
+        folder and nothing else, and notices when you add photos to it.</p>
+      </article>
+      <article class="card reveal" data-reveal-delay="60">
+        <h3>Photos and video</h3>
+        <p>JPEG, PNG, GIF, WebP, HEIC. MP4, MKV, WebM, MOV — muted by default, played to
+        the end, then it moves on.</p>
+      </article>
+      <article class="card reveal" data-reveal-delay="120">
+        <h3>Wakes and sleeps</h3>
+        <p>Screen on at 07:00, big clock and screen off at 23:00. It restarts itself after a
+        power cut, which is the failure mode a shelf device actually has.</p>
+      </article>
+      <article class="card reveal">
+        <h3>Favourites</h3>
+        <p>Tap the heart and that photo comes around about three times as often — spaced out,
+        so it never repeats back to back.</p>
+      </article>
+      <article class="card reveal" data-reveal-delay="60">
+        <h3>Gets out of the way</h3>
+        <p>Fullscreen, no status bar, no navigation bar. Controls stay hidden until you touch
+        the screen, then leave again.</p>
+      </article>
+      <article class="card reveal" data-reveal-delay="120">
+        <h3>Built for 1&nbsp;GB</h3>
+        <p>The target is a 2015 tablet with slow storage and a single hardware video decoder,
+        not a phone that happens to run it.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── setup ───────────────────────── -->
+<section class="section" id="setup">
+  <div class="wrap wrap--read">
+    <h2 class="h2 reveal">Setting it up</h2>
+    <p class="lede reveal">Four steps, about ten minutes, most of which is finding the cable.</p>
+
+    <ol class="steps">
+      <li class="step reveal">
+        <span class="step__n">1</span>
+        <div>
+          <h3>Put the photos on the tablet</h3>
+          <p>An SD card is ideal — it keeps them off the small internal storage, and you can
+          pull the card out to change the collection later.</p>
+        </div>
+      </li>
+      <li class="step reveal" data-reveal-delay="60">
+        <span class="step__n">2</span>
+        <div>
+          <h3>Install the APK</h3>
+          <p>Copy it across and open it, allowing installation from unknown sources when
+          asked. Or over USB:</p>
+          <div class="code">
+            <code id="adbCmd">adb install -r retroframe-v0.2.0.apk</code>
+            <button type="button" class="copy" data-copy="#adbCmd">Copy</button>
+          </div>
+        </div>
+      </li>
+      <li class="step reveal" data-reveal-delay="120">
+        <span class="step__n">3</span>
+        <div>
+          <h3>Pick your folder</h3>
+          <p>RetroFrame opens the system folder picker on first launch. It keeps permission
+          to that one folder — not to your files in general.</p>
+        </div>
+      </li>
+      <li class="step reveal" data-reveal-delay="180">
+        <span class="step__n">4</span>
+        <div>
+          <h3>Set the schedule and leave it</h3>
+          <p>Tap the screen, open settings, set a wake and sleep time in 24-hour
+          <code>HH:mm</code>. Turn on auto-start so a power cut doesn't leave a black screen.
+          Then put it on a shelf and forget about it.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="tips reveal">
+      <h3 class="tips__h">Two things worth knowing about the hardware</h3>
+      <p><strong>Heat kills batteries.</strong> A tablet permanently charging with a bright
+      screen runs hot, and the battery will swell over months. Use the sleep schedule, turn
+      the brightness down, give it air. If you can run it with the battery removed, do.</p>
+      <p><strong>Turn off the lock screen</strong>, or the wake schedule lands on it instead
+      of your photos.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── engineering ───────────────────────── -->
+<section class="section" id="engineering">
+  <div class="wrap">
+    <h2 class="h2 reveal">How it's built</h2>
+    <p class="lede reveal">
+      Version 0.2.0 was a rewrite. The features didn't change; how they work did. These are
+      the measurements that drove it.
+    </p>
+
+    <div class="ledger reveal">
+      <div class="ledger__row ledger__row--head">
+        <span></span><span>Before</span><span>After</span>
+      </div>
+      <div class="ledger__row">
+        <span class="ledger__k">Scanning a 500-photo folder</span>
+        <span class="ledger__was">~1,500 IPC calls</span>
+        <span class="ledger__is">1 cursor query</span>
+      </div>
+      <div class="ledger__row">
+        <span class="ledger__k">Watching that folder</span>
+        <span class="ledger__was">Full rescan, every 10s, forever</span>
+        <span class="ledger__is">ContentObserver</span>
+      </div>
+      <div class="ledger__row">
+        <span class="ledger__k">Concurrent video decoders</span>
+        <span class="ledger__was">Up to 3</span>
+        <span class="ledger__is">1, shared</span>
+      </div>
+      <div class="ledger__row">
+        <span class="ledger__k">Image decode size</span>
+        <span class="ledger__was">Fixed 2048×2048</span>
+        <span class="ledger__is">Your screen, RGB_565 on low RAM</span>
+      </div>
+      <div class="ledger__row">
+        <span class="ledger__k">Release APK</span>
+        <span class="ledger__was">Build failed entirely</span>
+        <span class="ledger__is">3.0 MB, R8 minified</span>
+      </div>
+      <div class="ledger__row">
+        <span class="ledger__k">Unit tests</span>
+        <span class="ledger__was">None</span>
+        <span class="ledger__is">30</span>
+      </div>
+    </div>
+
+    <div class="notes">
+      <article class="note reveal">
+        <h3>A crash nobody could see</h3>
+        <p><code>setExactAndAllowWhileIdle</code> arrived in API&nbsp;23. The app's minimum is
+        API&nbsp;22. Every scheduled alarm would have thrown on Android&nbsp;5.1 — the oldest
+        version it claims to support, and the hardest to get hold of to test. Lint found it;
+        nothing else would have.</p>
+      </article>
+      <article class="note reveal" data-reveal-delay="60">
+        <h3>The expensive convenience</h3>
+        <p><code>DocumentFile.listFiles()</code> looks like one call. It queries for the child
+        IDs, then charges another round trip across a process boundary for every
+        <em>property</em> of every file. That's where the 1,500 calls came from — and it ran
+        on a timer.</p>
+      </article>
+      <article class="note reveal" data-reveal-delay="120">
+        <h3>Enforced, not promised</h3>
+        <p>Plenty of apps say they don't collect anything. This one doesn't declare the
+        <code>INTERNET</code> permission, so the operating system won't let it open a socket
+        even if a future contributor tried. The claim is checkable in the manifest.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── download ───────────────────────── -->
+<section class="section section--end">
+  <div class="wrap">
+    <div class="final reveal">
+      <h2 class="final__h">Go get the tablet out of the drawer.</h2>
+      <a class="btn btn--primary btn--lg" href="https://github.com/RobTar97/retroframe/releases/download/v0.2.0/retroframe-v0.2.0.apk">
+        Download RetroFrame
+        <span class="btn__meta">v0.2.0 · 3.1 MB · Android 5.1+</span>
+      </a>
+
+      <div class="verify">
+        <p class="verify__h">Verify what you're installing</p>
+        <div class="code code--wrap">
+          <code id="sha">9ce964fb0b4e2ec9a2211e4a6dc0924236ae6f033e6d45ad55f5246f53d813e0</code>
+          <button type="button" class="copy" data-copy="#sha">Copy</button>
+        </div>
+        <p class="verify__note">
+          SHA-256 of the APK. Run <code>sha256sum</code> on the file you downloaded and
+          compare — or build it yourself from source and skip trusting anyone.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot__in">
+    <p class="foot__lic">
+      Free software under the <a href="https://www.gnu.org/licenses/gpl-3.0.html">GNU GPL v3</a>.
+      Use it, study it, change it, share it.
+    </p>
+    <nav class="foot__nav">
+      <a href="https://github.com/RobTar97/retroframe">GitHub</a>
+      <a href="https://github.com/RobTar97/retroframe/blob/main/docs/ARCHITECTURE.md">Architecture</a>
+      <a href="https://github.com/RobTar97/retroframe/blob/main/docs/KNOWN_ISSUES.md">Known issues</a>
+      <a href="https://github.com/RobTar97/retroframe/issues">Issues</a>
+    </nav>
+    <p class="foot__end">Every tablet kept out of a landfill is a small win.</p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>
