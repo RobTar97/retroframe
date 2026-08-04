@@ -33,8 +33,10 @@ android {
         applicationId = "com.rober.photoframe"
         minSdk = 22
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.2.0"
+        // versionCode must increase on every release: Android refuses to install a package
+        // that does not, and F-Droid keys its changelogs by this number.
+        versionCode = 2
+        versionName = "0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

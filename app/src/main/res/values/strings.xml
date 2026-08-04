@@ -76,9 +76,10 @@
     <string name="about_gpl">RetroFrame is free software. You may use, study, share and change it under the GNU General Public License, version 3 or later.\n\nIt comes with ABSOLUTELY NO WARRANTY, to the extent permitted by law.\n\nThe complete source code for this version is available at the address below.</string>
     <string name="about_source">View the source code</string>
     <string name="about_read_license">Read the full licence</string>
-    <string name="about_urls">github.com/RobTar97/retroframe\ngnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_privacy">Read the privacy policy</string>
+    <string name="about_urls">github.com/RobTar97/retroframe\ngnu.org/licenses/gpl-3.0.html\ngithub.com/RobTar97/retroframe/blob/main/PRIVACY.md</string>
     <string name="about_third_party">Built with</string>
-    <string name="about_third_party_list">AndroidX libraries — Apache License 2.0\nMaterial Components for Android — Apache License 2.0\nAndroidX Media3 — Apache License 2.0\nGlide — BSD 2-Clause, with parts under Apache License 2.0 and MIT\nPhotoView — Apache License 2.0\nKotlin and kotlinx.coroutines — Apache License 2.0</string>
+    <string name="about_third_party_list">AndroidX libraries — Apache License 2.0\nMaterial Components for Android — Apache License 2.0\nAndroidX Media3 — Apache License 2.0\nGlide — BSD 2-Clause, with parts under Apache License 2.0 and MIT\nPhotoView — Apache License 2.0\nGuava — Apache License 2.0\nKotlin and kotlinx.coroutines — Apache License 2.0</string>
     <string name="about_no_browser">No browser found. The addresses are shown above and can be copied.</string>
     <string name="close">Close</string>
 

@@ -44,6 +44,7 @@ class AboutDialogFragment : DialogFragment() {
 
         view.findViewById<Button>(R.id.btnSource).setOnClickListener { open(SOURCE_URL) }
         view.findViewById<Button>(R.id.btnLicense).setOnClickListener { open(LICENSE_URL) }
+        view.findViewById<Button>(R.id.btnPrivacy).setOnClickListener { open(PRIVACY_URL) }
         view.findViewById<Button>(R.id.btnAboutClose).setOnClickListener { dismiss() }
     }
 
@@ -92,5 +93,9 @@ class AboutDialogFragment : DialogFragment() {
     companion object {
         const val SOURCE_URL = "https://github.com/RobTar97/retroframe"
         const val LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
+
+        // Play and F-Droid both want a reachable privacy policy, and someone handed the APK
+        // on an SD card has no other route to it.
+        const val PRIVACY_URL = "https://github.com/RobTar97/retroframe/blob/main/PRIVACY.md"
     }
 }

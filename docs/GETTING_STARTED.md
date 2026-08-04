@@ -149,10 +149,10 @@ the screen and hit the ↻ button to pick them up immediately.
 
 ```bash
 # Verify the download first
-sha256sum retroframe-v0.2.0.apk
+sha256sum retroframe-v0.3.0.apk
 # compare against the checksum on the release page
 
-adb install -r retroframe-v0.2.0.apk
+adb install -r retroframe-v0.3.0.apk
 ```
 
 Push some photos and launch:

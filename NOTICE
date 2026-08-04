@@ -23,6 +23,12 @@ RetroFrame bundles the following libraries. The same list is shown inside the ap
 under Settings -> About RetroFrame, so that anyone who receives only the APK can
 see it too.
 
+This list was checked against the contents of a built release APK, not only
+against the dependency declarations. That matters: Guava arrives transitively
+through Media3 rather than being asked for by name, and R8 renames its packages
+on the way in, so it is easy both to miss when reading build.gradle.kts and to
+wrongly conclude is absent when reading the APK.
+
 --------------------------------------------------------------------------------
 AndroidX libraries — Apache License 2.0
   androidx.core:core-ktx
@@ -63,6 +69,15 @@ PhotoView — Apache License 2.0
   com.github.chrisbanes:PhotoView
   Copyright Chris Banes
   https://github.com/Baseflow/PhotoView
+
+--------------------------------------------------------------------------------
+Guava — Apache License 2.0
+  com.google.guava:guava
+  com.google.guava:failureaccess
+  Copyright The Guava Authors
+  https://github.com/google/guava
+  Not a declared dependency of this app; it arrives with AndroidX Media3, and
+  parts of it are shrunk into the released APK.
 
 --------------------------------------------------------------------------------
 Kotlin standard library and kotlinx.coroutines — Apache License 2.0

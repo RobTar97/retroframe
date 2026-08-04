@@ -15,7 +15,7 @@ Point it at a folder. It shows your photos. That's the whole app.
 [![Kotlin](https://img.shields.io/badge/kotlin-2.0.21-7F52FF.svg)](https://kotlinlang.org)
 [![No tracking](https://img.shields.io/badge/tracking-none-success.svg)](#privacy)
 
-**[retroframe website →](https://robtar97.github.io/retroframe/)**  ·  **[Download v0.2.0 (3.1 MB) →](https://github.com/RobTar97/retroframe/releases/latest)**
+**[retroframe website →](https://robtar97.github.io/retroframe/)**  ·  **[Download v0.3.0 (3.1 MB) →](https://github.com/RobTar97/retroframe/releases/latest)**
 
 <br>
 
@@ -62,6 +62,8 @@ That single constraint drives every decision in this project:
 
 **Slideshow**
 - Reads any folder you pick, including SD cards and USB storage
+- Looks inside folders within it too, up to five levels deep — point it at `Photos` and it
+  finds `Photos/2019/Italy`
 - Photos: JPEG, PNG, GIF, BMP, WebP, HEIC
 - Videos: MP4, MKV, WebM, AVI, MOV, 3GP — muted by default, played to the end, then advances
 - Adjustable interval, 5 seconds to 1 hour
@@ -80,8 +82,15 @@ That single constraint drives every decision in this project:
 **Scheduling** — what makes it usable as a permanent fixture
 - **Wake time:** turns the screen on and starts the slideshow
 - **Sleep time:** drops to clock mode and releases the screen so it can turn off
+- **Night dimming:** hold clock mode at any brightness you like. No permission needed, and
+  Android undoes it as soon as the app loses focus
 - **Morning alarm:** optional daily alarm with sound, over the lock screen
 - **Auto-start on boot:** survives the inevitable power cut
+
+**Built to be left alone for years**
+- **Burn-in protection:** the clock drifts a few millimetres a minute, so it cannot ghost
+  itself permanently into an OLED panel
+- Times are set with the system clock picker, not typed as `HH:mm`
 
 **Deliberately minimal UI**
 - Fullscreen and immersive — no status bar, no navigation bar, no chrome
@@ -99,6 +108,15 @@ RetroFrame collects nothing, transmits nothing, and has nowhere to send anything
 | Analytics / crash reporting | None, and none will be accepted — see [CONTRIBUTING](CONTRIBUTING.md) |
 | Storage access | One folder, chosen by you through the system picker. Read-only |
 | Permissions | Boot, wake lock, alarms, notifications. That is the complete list |
+
+The permission list is not a promise — it is
+[asserted by a test](app/src/androidTest/java/com/rober/photoframe/ManifestInstrumentedTest.kt)
+that runs on real emulators on every push, and fails the build if a dependency ever merges a
+fifth permission in. One already tried: Media3 injects `ACCESS_NETWORK_STATE` for adaptive
+streaming this app never does, and it is actively removed from the manifest.
+
+Full details, including where the app's rights under GDPR, CCPA and COPPA land and how to
+verify any of it yourself, are in **[PRIVACY.md](PRIVACY.md)**.
 
 ## Compatibility
 
@@ -125,7 +143,7 @@ copy it to your tablet and open it. You will need to allow installation from unk
 Verify it first if you like — every release lists the APK's SHA-256:
 
 ```bash
-sha256sum retroframe-v0.2.0.apk
+sha256sum retroframe-v0.3.0.apk
 ```
 
 ### Build it yourself
@@ -237,13 +255,14 @@ Full write-up in **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
 
 ## Project status
 
-**Version 0.2.0 — [released](https://github.com/RobTar97/retroframe/releases/latest), but unproven on real hardware.**
+**Version 0.3.0 — [released](https://github.com/RobTar97/retroframe/releases/latest), but unproven on real hardware.**
 
-The app builds cleanly, R8-minifies to ~3 MB, and passes 30 unit tests plus 14 instrumented
+The app builds cleanly, R8-minifies to ~3 MB, and passes 52 unit tests plus 14 instrumented
 tests run on emulators at **API 22, 28 and 36** on every push. Version 0.2.0 was a substantial
 rewrite that fixed a long list of real defects — including a crash on Android 5.1 that had been
 latent since the beginning, a release build that could never be produced at all, and a folder
-watcher that hammered the storage provider every 10 seconds.
+watcher that hammered the storage provider every 10 seconds. Version 0.3.0 added the things a
+device left on a shelf actually needs: subfolder scanning, night dimming and burn-in protection.
 
 **It still has not run on a physical tablet.** CI proves the code executes on Android 5.1; it
 proves nothing about a 2015 vendor ROM's storage provider, its single hardware video decoder,

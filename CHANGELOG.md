@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-08-04
+
+The release that makes it a *frame*, rather than a slideshow you happen to leave running.
+
+> ⚠️ **Still not verified on physical hardware.** Every feature below was exercised on an
+> emulator, 52 unit tests and 14 instrumented tests pass at API 22, 28 and 36 — but nothing
+> here has been left on a real shelf for a fortnight, and an emulator cannot reproduce a 2015
+> vendor ROM's storage provider or how warm a tablet gets after two weeks.
+> See [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md).
+
+### Added
+
+- **Photos in subfolders are found.** If your photos live in `2019/`, `Holidays/`, `Kids/` and
+  you point RetroFrame at the folder above, it now looks inside — five levels deep, capped at
+  10,000 photos. Previously that gave you an empty screen with no explanation. On by default,
+  because "more photos than I expected" is a far kinder failure than "none of my photos
+  appear."
+- **Night dimming.** Clock mode can hold the screen at any brightness you choose. It is a
+  window-level override, so it needs no permission and Android undoes it the moment the app
+  loses focus — nothing here can leave a tablet stuck dim with no obvious way back.
+- **Burn-in protection.** The clock drifts a few millimetres a minute around a slow circle.
+  A frame shows the same clock in the same pixels for years, which is long enough to
+  permanently ghost it into an OLED panel. On by default.
+- **Time pickers.** The wake, sleep and alarm fields open the system clock picker instead of
+  demanding `HH:mm` typed by hand, and honour the device's 12- or 24-hour setting.
+- **A progress indicator while the folder is read**, which a recursive scan of a full SD card
+  is now slow enough to need.
+- **The chosen folder's name is shown in settings**, so "why am I seeing these photos?" has an
+  answer without walking back through the picker.
+- **[PRIVACY.md](PRIVACY.md)** — a full privacy policy, linked from the app's About screen,
+  the site and the store metadata. Both Play and F-Droid require one.
+- **An in-app About screen** carrying the GPL notice, a route to the source, and the
+  third-party licence list — GPL-3.0 §4–5 require these reach anyone who receives the binary,
+  and someone handed the APK on an SD card has seen no release notes.
+- **Signed releases built from a tag by CI**, verified against an expected certificate
+  fingerprint so a wrong-key build — which installs fine but can never upgrade an existing
+  install — fails the workflow instead of reaching people.
+- **14 instrumented tests, and a CI emulator matrix at API 22, 28 and 36.** API 22 is the
+  point: it executes the scheduling code on the oldest supported Android, where a call to a
+  newer API previously would have crashed with nothing noticing.
+- Tests that assert the manifest declares exactly four permissions and no network permission,
+  and that every scheduled receiver is still reachable after a refactor or an R8 rename.
+- ktlint, `.editorconfig`, `CODEOWNERS`, a `docs/` index, and an F-Droid build recipe.
+
 ### Fixed
 
 - **`SCHEDULE_EXACT_ALARMS` was not a real permission.** The manifest had it plural; the
@@ -17,17 +61,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   inspection and not just in the readme.
 - **Save and Cancel were below the fold** in settings on an 800px landscape tablet. They are
   now a fixed footer outside the scroll area.
-
-### Added
-
-- 14 instrumented tests, and a CI emulator matrix at **API 22, 28 and 36**. API 22 is the
-  point: it executes the scheduling code on the oldest supported Android, where a call to a
-  newer API previously would have crashed with nothing noticing.
-- Tests that assert the manifest declares exactly four permissions and no network permission,
-  and that every scheduled receiver is still reachable after a refactor or an R8 rename.
-- ktlint, `.editorconfig`, `CODEOWNERS` and a `docs/` index.
+- **"Include videos" did nothing** until something else forced a reload. The filter is applied
+  when the folder is read, but changing settings only rebuilt the playlist from what had
+  already been read.
+- **Rotating the tablet stopped it holding the screen awake.** Window flags do not survive an
+  activity being recreated, and neither mode-switch path runs on the restore path.
+- **The safety-net folder poll was blind to subfolders**, so photos added to `Photos/2020`
+  would never have appeared until the app restarted.
 
 ### Changed
+
+- Guava is now attributed in `NOTICE` and the in-app licence list. It arrives transitively
+  through Media3 and R8 renames its packages, so it was invisible both in `build.gradle.kts`
+  and in a naive read of the built APK. The list is now checked against a real release build.
 
 - Scheduling consolidated from `util/` and `alarm/` into one `schedule/` package;
   `ScreenManager` renamed `DailySchedule`, `FolderMonitor` moved to `data/`.

@@ -1,0 +1,13 @@
+RetroFrame 0.3.0 - the release that makes it a frame, not just a slideshow.
+
+Photos in subfolders are found. Point it at the folder above "2019" and "Holidays" and it looks inside, five levels deep. Before, that gave you an empty screen and no explanation.
+
+Night dimming. Clock mode can hold the screen at whatever brightness suits a dark room. No permission needed, and Android undoes it the moment you leave the app.
+
+Burn-in protection. The clock drifts a few millimetres a minute. Left in one place for years, bright text can permanently stain a screen.
+
+Time pickers. Wake, sleep and alarm times are tapped, not typed as HH:mm.
+
+Fixed: "Include videos" did nothing until something else forced a reload. Rotating the tablet stopped it holding the screen awake.
+
+Still not tested on a physical tablet - reports very welcome.
