@@ -38,10 +38,13 @@ class SlideshowFragment :
     private lateinit var emptyState: TextView
     private lateinit var btnSelectFolder: View
     private lateinit var topOverlay: View
+    private lateinit var loadingState: View
     private lateinit var btnPlayPause: ImageButton
     private lateinit var btnFavorite: ImageButton
 
     private lateinit var player: SharedPlayer
+
+    private var burnInGuard: BurnInGuard? = null
 
     private var currentItem: MediaItem? = null
 
@@ -82,8 +85,20 @@ class SlideshowFragment :
         emptyState = view.findViewById(R.id.emptyState)
         btnSelectFolder = view.findViewById(R.id.btnSelectFolder)
         topOverlay = view.findViewById(R.id.topOverlay)
+        loadingState = view.findViewById(R.id.loadingState)
         btnPlayPause = view.findViewById(R.id.btnPlayPause)
         btnFavorite = view.findViewById(R.id.btnFavorite)
+
+        // The bar itself stays put — see BurnInGuard — but the white text inside it does not.
+        if (PhotoframePreferences.burnInProtection) {
+            burnInGuard =
+                BurnInGuard(
+                    listOf(
+                        view.findViewById(R.id.dateText),
+                        view.findViewById(R.id.clockText),
+                    ),
+                ).also { it.start() }
+        }
 
         player = SharedPlayer(requireContext().applicationContext)
         player.setOnVideoEnded { advance() }
@@ -347,6 +362,7 @@ class SlideshowFragment :
         viewModel.state.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is SlideshowState.Ready -> {
+                    loadingState.visibility = View.GONE
                     setEmptyVisible(false)
                     viewPager.visibility = View.VISIBLE
                     adapter.submitList(state.playlist)
@@ -356,7 +372,7 @@ class SlideshowFragment :
                 }
                 SlideshowState.FolderEmpty -> showEmpty(R.string.empty_folder)
                 SlideshowState.NoFolderSelected -> showEmpty(R.string.empty_no_folder)
-                SlideshowState.Loading -> Unit
+                SlideshowState.Loading -> showLoading()
             }
         }
 
@@ -379,11 +395,22 @@ class SlideshowFragment :
     }
 
     private fun showEmpty(messageRes: Int) {
+        loadingState.visibility = View.GONE
         adapter.submitList(emptyList())
         viewPager.visibility = View.GONE
         emptyState.setText(messageRes)
         setEmptyVisible(true)
         showControls()
+    }
+
+    /**
+     * A scan can finish in milliseconds on a small folder, and the spinner flashing on and
+     * straight off again looks like a glitch — so the previous slideshow is left visible
+     * underneath and only the spinner is added on top.
+     */
+    private fun showLoading() {
+        setEmptyVisible(false)
+        loadingState.visibility = View.VISIBLE
     }
 
     /**
@@ -413,6 +440,8 @@ class SlideshowFragment :
 
     override fun onDestroyView() {
         controlsOverlay.removeCallbacks(hideControls)
+        burnInGuard?.stop()
+        burnInGuard = null
         player.release()
         viewPager.adapter = null
         super.onDestroyView()

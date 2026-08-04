@@ -45,6 +45,37 @@
         app:layout_constraintTop_toBottomOf="@id/emptyState"
         tools:visibility="visible" />
 
+    <!--
+      Shown while the folder is being read. A recursive scan of a full SD card on slow eMMC
+      takes long enough that a bare black screen reads as a crash.
+    -->
+    <LinearLayout
+        android:id="@+id/loadingState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <ProgressBar
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:indeterminate="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/loading_folder"
+            android:textColor="#DDDDDD"
+            android:textSize="18sp" />
+    </LinearLayout>
+
     <!-- Clock and date, always visible over the photo -->
     <LinearLayout
         android:id="@+id/topOverlay"

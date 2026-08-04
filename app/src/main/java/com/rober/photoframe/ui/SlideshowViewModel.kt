@@ -72,6 +72,32 @@ class SlideshowViewModel(application: Application) : AndroidViewModel(applicatio
     private var timerJob: Job? = null
     private var loadJob: Job? = null
 
+    /**
+     * The settings the current [library] was read with.
+     *
+     * Some settings only change the ordering of what has already been read, and those must not
+     * trigger a rescan on a device where scanning is expensive. Others change *what is read at
+     * all*. Comparing the inputs is how the two are told apart — previously they were not, and
+     * turning "Include videos" back on left the videos missing until something else happened
+     * to force a reload.
+     */
+    private data class ScanInputs(
+        val uri: String?,
+        val includeVideos: Boolean,
+        val includeSubfolders: Boolean,
+    ) {
+        companion object {
+            fun current() =
+                ScanInputs(
+                    uri = PhotoframePreferences.galleryUriString,
+                    includeVideos = PhotoframePreferences.includeVideos,
+                    includeSubfolders = PhotoframePreferences.includeSubfolders,
+                )
+        }
+    }
+
+    private var lastScan: ScanInputs? = null
+
     init {
         reload()
         observeFolder()
@@ -100,7 +126,18 @@ class SlideshowViewModel(application: Application) : AndroidViewModel(applicatio
                     _state.value = SlideshowState.NoFolderSelected
                     return@launch
                 }
-                library = repository.scan(treeUri, PhotoframePreferences.includeVideos)
+                // A recursive scan of a big card is slow enough to see, so say so rather than
+                // leaving the last playlist on screen looking frozen.
+                _state.value = SlideshowState.Loading
+
+                val inputs = ScanInputs.current()
+                library =
+                    repository.scan(
+                        treeUri = treeUri,
+                        includeVideos = inputs.includeVideos,
+                        includeSubfolders = inputs.includeSubfolders,
+                    )
+                lastScan = inputs
 
                 // Forget favourites whose photos are gone, so the set cannot grow without bound.
                 FavoritesManager.retainOnly(library.mapTo(HashSet(library.size)) { it.documentId })
@@ -142,7 +179,11 @@ class SlideshowViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun startWatching() {
         val uriString = PhotoframePreferences.galleryUriString ?: return
-        folderMonitor.start(uriString.toUri(), viewModelScope)
+        folderMonitor.start(
+            treeUri = uriString.toUri(),
+            scope = viewModelScope,
+            includeSubfolders = PhotoframePreferences.includeSubfolders,
+        )
     }
 
     fun stopWatching() = folderMonitor.stop()
@@ -212,7 +253,7 @@ class SlideshowViewModel(application: Application) : AndroidViewModel(applicatio
 
     /** Settings changed: re-apply without a folder rescan unless the source itself changed. */
     fun onSettingsChanged(folderChanged: Boolean) {
-        if (folderChanged) {
+        if (folderChanged || ScanInputs.current() != lastScan) {
             reload()
             startWatching()
         } else {

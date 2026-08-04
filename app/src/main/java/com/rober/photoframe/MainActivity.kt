@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import com.rober.photoframe.settings.Brightness
 import com.rober.photoframe.settings.PhotoframePreferences
 import com.rober.photoframe.ui.ClockFragment
 import com.rober.photoframe.ui.SlideshowFragment
@@ -40,6 +41,15 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         if (savedInstanceState == null) {
             val mode = intent.getStringExtra(EXTRA_MODE)
             if (mode == MODE_CLOCK) switchToClockMode() else switchToPhotoMode()
+        } else {
+            // Window flags do not survive the activity being recreated, and neither switch
+            // method runs on the restore path — so after a rotation or a system font change
+            // the frame would quietly stop holding the screen awake, and clock mode would
+            // come back at full brightness.
+            applyModeFlags(
+                clockMode = supportFragmentManager.findFragmentById(R.id.container)
+                    is ClockFragment,
+            )
         }
 
         requestNotificationPermissionIfNeeded()
@@ -104,13 +114,25 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     // ------------------------------------------------------------------ modes
 
     fun switchToPhotoMode() {
-        setKeepScreenOn(PhotoframePreferences.keepScreenOn)
+        applyModeFlags(clockMode = false)
         show(SlideshowFragment())
     }
 
     fun switchToClockMode() {
-        setKeepScreenOn(false)
+        applyModeFlags(clockMode = true)
         show(ClockFragment())
+    }
+
+    /** The two window properties that differ between the modes. */
+    private fun applyModeFlags(clockMode: Boolean) {
+        setKeepScreenOn(!clockMode && PhotoframePreferences.keepScreenOn)
+        applyBrightness(
+            if (clockMode) {
+                Brightness.toWindowValue(PhotoframePreferences.nightBrightnessPercent)
+            } else {
+                Brightness.OVERRIDE_NONE
+            },
+        )
     }
 
     private fun show(fragment: Fragment) {
@@ -123,6 +145,21 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             setReorderingAllowed(true)
             replace(R.id.container, fragment)
         }
+    }
+
+    /**
+     * Dims the panel for clock mode.
+     *
+     * This is a *window* brightness override, not a system setting: it needs no permission,
+     * applies only while RetroFrame is in front, and is undone by Android the moment the app
+     * loses focus. That matters for a device on a bedside table — nothing this app does can
+     * leave the tablet stuck at 5% for its owner to puzzle over later.
+     *
+     * [Brightness.OVERRIDE_NONE] hands control back to the system.
+     */
+    private fun applyBrightness(value: Float) {
+        window.attributes =
+            window.attributes.apply { screenBrightness = value }
     }
 
     private fun setKeepScreenOn(enabled: Boolean) {

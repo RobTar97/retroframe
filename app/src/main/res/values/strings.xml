@@ -9,8 +9,9 @@
 
     <!-- Empty states -->
     <string name="empty_no_folder">No folder chosen yet.\n\nTap Choose folder, then open the folder your photos are in and tap “Use this folder”.</string>
-    <string name="empty_folder">That folder has no photos or videos in it.\n\nRetroFrame only reads the folder you picked, not the ones inside it — so choose the folder the pictures are actually in.</string>
+    <string name="empty_folder">That folder has no photos or videos in it.\n\nRetroFrame also looks inside folders within it, so if the pictures really are there, they may be more than five folders deep.</string>
     <string name="select_folder">Choose folder</string>
+    <string name="loading_folder">Reading your folder…</string>
 
     <!-- Favourites -->
     <string name="favorite_added">Added to favourites</string>
@@ -37,20 +38,32 @@
     <string name="hint_sleep">23:00</string>
     <string name="settings_shuffle">Shuffle order</string>
     <string name="settings_shuffle_hint">Off sorts photos by name. Favourites only repeat when shuffle is on.</string>
+    <string name="settings_subfolders">Include folders inside it</string>
+    <string name="settings_subfolders_hint">Looks up to five folders deep, so “Photos” can hold “2019”, “2020” and so on.</string>
     <string name="settings_videos">Include videos</string>
     <string name="settings_video_sound">Play video sound</string>
     <string name="settings_keep_screen_on">Keep screen on during slideshow</string>
+    <string name="settings_burn_in">Protect the screen from marking</string>
+    <string name="settings_burn_in_hint">Moves the clock a few millimetres every minute. Left in one place for months, bright text can stain a screen permanently.</string>
     <string name="settings_transition">Transition</string>
     <string name="settings_transition_fade">Fade</string>
     <string name="settings_transition_slide">Slide</string>
     <string name="settings_transition_zoom">Zoom</string>
     <string name="settings_schedule">Daily schedule</string>
-    <string name="settings_wake_time">Wake time (HH:mm)</string>
-    <string name="settings_sleep_time">Sleep time (HH:mm)</string>
+    <string name="settings_wake_time">Wake time</string>
+    <string name="settings_sleep_time">Sleep time</string>
     <string name="settings_schedule_hint">Leave blank to disable. At sleep time the clock is shown and the screen may turn off.</string>
+    <string name="settings_night_brightness">Screen brightness at night: %1$d%%</string>
+    <string name="settings_night_brightness_off">Screen brightness at night: leave to the tablet</string>
+    <string name="settings_night_brightness_hint">Applies to clock mode only, and only while RetroFrame is on screen. Slide fully left to leave the brightness alone.</string>
     <string name="settings_alarm">Morning alarm</string>
     <string name="settings_alarm_enabled">Enable morning alarm</string>
-    <string name="settings_alarm_time">Alarm time (HH:mm)</string>
+    <string name="settings_alarm_time">Alarm time</string>
+    <string name="hint_tap_to_set">Tap to set</string>
+    <string name="time_clear">Clear</string>
+    <string name="settings_current_folder">Showing photos from: %1$s</string>
+    <string name="settings_current_folder_unknown">No folder chosen yet</string>
+    <string name="settings_current_folder_whole_volume">Showing photos from the whole storage volume</string>
     <string name="settings_auto_start">Start automatically after reboot</string>
     <string name="settings_exact_alarm_warning">This device is not allowing exact alarms, so scheduled times may be up to a minute late. Tap to fix.</string>
     <string name="settings_change_folder">Change folder</string>

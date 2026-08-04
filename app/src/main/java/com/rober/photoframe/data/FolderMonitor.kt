@@ -63,18 +63,29 @@ class FolderMonitor(
     fun start(
         treeUri: Uri,
         scope: CoroutineScope,
+        includeSubfolders: Boolean = false,
     ) {
         stop()
 
-        val childrenUri =
-            try {
-                DocumentsContract.buildChildDocumentsUriUsingTree(
-                    treeUri,
-                    DocumentsContract.getTreeDocumentId(treeUri),
-                )
-            } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Cannot watch $treeUri", e)
-                return
+        // What to observe depends on how deep the scan goes.
+        //
+        // A subfolder's children URI is `.../tree/<root>/document/<subfolder>/children`, which
+        // is not a descendant of the *root's* children URI — so watching that alone would
+        // never hear about a photo dropped into a subfolder. The bare tree URI is an ancestor
+        // of every document URI under it, so with descendants enabled it catches the lot.
+        val watchUri =
+            if (includeSubfolders) {
+                treeUri
+            } else {
+                try {
+                    DocumentsContract.buildChildDocumentsUriUsingTree(
+                        treeUri,
+                        DocumentsContract.getTreeDocumentId(treeUri),
+                    )
+                } catch (e: IllegalArgumentException) {
+                    Log.e(TAG, "Cannot watch $treeUri", e)
+                    return
+                }
             }
 
         observer =
@@ -90,7 +101,7 @@ class FolderMonitor(
                 }
             }.also { obs ->
                 try {
-                    context.contentResolver.registerContentObserver(childrenUri, true, obs)
+                    context.contentResolver.registerContentObserver(watchUri, true, obs)
                 } catch (e: SecurityException) {
                     Log.e(TAG, "Not permitted to observe $treeUri", e)
                     observer = null
@@ -100,10 +111,10 @@ class FolderMonitor(
         fallbackJob =
             scope.launch {
                 // Seed the signature so the first poll does not report a spurious change.
-                lastSignature = repository.signature(treeUri)
+                lastSignature = repository.signature(treeUri, includeSubfolders)
                 while (isActive) {
                     delay(FALLBACK_POLL_MS)
-                    val current = repository.signature(treeUri)
+                    val current = repository.signature(treeUri, includeSubfolders)
                     if (current != FolderSignature.UNKNOWN && current != lastSignature) {
                         Log.d(TAG, "Fallback poll detected a change the provider did not report")
                         lastSignature = current

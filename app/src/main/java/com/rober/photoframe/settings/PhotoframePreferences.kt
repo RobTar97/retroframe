@@ -25,6 +25,9 @@ object PhotoframePreferences {
     private const val KEY_SLEEP_TIME = "sleep_time"
     private const val KEY_KEEP_SCREEN_ON = "keep_screen_on"
     private const val KEY_SEEN_WELCOME = "seen_welcome"
+    private const val KEY_INCLUDE_SUBFOLDERS = "include_subfolders"
+    private const val KEY_NIGHT_BRIGHTNESS = "night_brightness"
+    private const val KEY_BURN_IN_PROTECTION = "burn_in_protection"
 
     const val MIN_INTERVAL_SECONDS = 5
     const val MAX_INTERVAL_SECONDS = 3600
@@ -32,6 +35,19 @@ object PhotoframePreferences {
 
     /** Sentinel for "no time set". */
     const val TIME_DISABLED = -1
+
+    /** Sentinel for "leave the screen at whatever the system decided". */
+    const val BRIGHTNESS_SYSTEM = -1
+
+    /**
+     * The floor for night dimming, as a percentage.
+     *
+     * Zero is a legal value for `screenBrightness`, but on a good many panels it means the
+     * backlight is off entirely — a frame the user cannot see and cannot obviously fix,
+     * because the tap-to-wake controls are invisible too. 5% is dim enough for a dark
+     * bedroom and still leaves something on screen.
+     */
+    const val MIN_NIGHT_BRIGHTNESS = 5
 
     private lateinit var prefs: SharedPreferences
 
@@ -61,6 +77,41 @@ object PhotoframePreferences {
         get() = prefs.getBoolean(KEY_INCLUDE_VIDEOS, true)
         set(value) {
             prefs.edit().putBoolean(KEY_INCLUDE_VIDEOS, value).commit()
+        }
+
+    /**
+     * Whether the scan descends into folders inside the chosen one.
+     *
+     * Defaults to on. People organise photos into `2019/`, `Holidays/`, `Kids/` and then point
+     * the frame at the folder above; before this existed they got an empty screen and no clue
+     * why. "More photos than I expected" is a far kinder failure than "none of my photos
+     * appear", so the surprising default is the safe one.
+     */
+    var includeSubfolders: Boolean
+        get() = prefs.getBoolean(KEY_INCLUDE_SUBFOLDERS, true)
+        set(value) {
+            prefs.edit().putBoolean(KEY_INCLUDE_SUBFOLDERS, value).commit()
+        }
+
+    /**
+     * Screen brightness during clock/sleep mode, as a percentage, or [BRIGHTNESS_SYSTEM].
+     *
+     * Stored as a percentage rather than the float the window API wants, because a percentage
+     * survives being read back into a slider without rounding drift.
+     */
+    var nightBrightnessPercent: Int
+        get() = prefs.getInt(KEY_NIGHT_BRIGHTNESS, BRIGHTNESS_SYSTEM)
+        set(value) {
+            val stored =
+                if (value < MIN_NIGHT_BRIGHTNESS) BRIGHTNESS_SYSTEM else value.coerceAtMost(100)
+            prefs.edit().putInt(KEY_NIGHT_BRIGHTNESS, stored).commit()
+        }
+
+    /** Whether static overlays drift slowly to avoid marking the panel. */
+    var burnInProtection: Boolean
+        get() = prefs.getBoolean(KEY_BURN_IN_PROTECTION, true)
+        set(value) {
+            prefs.edit().putBoolean(KEY_BURN_IN_PROTECTION, value).commit()
         }
 
     var galleryUriString: String?
@@ -151,6 +202,25 @@ object TimeOfDay {
     fun format(minutesSinceMidnight: Int): String? {
         if (minutesSinceMidnight < 0 || minutesSinceMidnight >= 24 * 60) return null
         return "%02d:%02d".format(minutesSinceMidnight / 60, minutesSinceMidnight % 60)
+    }
+}
+
+/**
+ * Converts the stored night-brightness percentage into what `WindowManager.LayoutParams`
+ * wants.
+ *
+ * Pure, and deliberately separate from the Activity, because the one thing that can go badly
+ * wrong here — handing the window a value low enough to black the panel out — is worth a unit
+ * test rather than a trip to a dark room with a tablet.
+ */
+object Brightness {
+    /** `WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE`, without the Android import. */
+    const val OVERRIDE_NONE = -1.0f
+
+    fun toWindowValue(percent: Int): Float {
+        if (percent < PhotoframePreferences.MIN_NIGHT_BRIGHTNESS) return OVERRIDE_NONE
+        return (percent.coerceAtMost(100) / 100f)
+            .coerceAtLeast(PhotoframePreferences.MIN_NIGHT_BRIGHTNESS / 100f)
     }
 }
 

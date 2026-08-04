@@ -7,6 +7,7 @@
   user could reasonably conclude there was no way to save.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/dialog_background"
@@ -87,6 +88,23 @@
             android:textSize="13sp" />
 
         <CheckBox
+            android:id="@+id/cbSubfolders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/settings_subfolders"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/settings_subfolders_hint"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="13sp" />
+
+        <CheckBox
             android:id="@+id/cbVideos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -106,10 +124,26 @@
             android:id="@+id/cbKeepScreenOn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:minHeight="48dp"
             android:text="@string/settings_keep_screen_on"
             android:textSize="16sp" />
+
+        <CheckBox
+            android:id="@+id/cbBurnIn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/settings_burn_in"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/settings_burn_in_hint"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="13sp" />
 
         <View
             android:layout_width="match_parent"
@@ -185,6 +219,11 @@
             android:textColor="@android:color/darker_gray"
             android:textSize="14sp" />
 
+        <!--
+          These three time fields are tapped, not typed into: the fragment clears the key
+          listener and opens the system clock picker instead. They stay EditTexts so the
+          existing setError() validation still has somewhere to show itself.
+        -->
         <EditText
             android:id="@+id/etWakeTime"
             android:layout_width="match_parent"
@@ -193,7 +232,7 @@
             android:layout_marginBottom="12dp"
             android:autofillHints="@string/hint_wake"
             android:background="@drawable/edit_text_background"
-            android:hint="@string/hint_wake"
+            android:hint="@string/hint_tap_to_set"
             android:inputType="datetime"
             android:minHeight="48dp"
             android:padding="12dp"
@@ -214,7 +253,7 @@
             android:layout_marginBottom="8dp"
             android:autofillHints="@string/hint_sleep"
             android:background="@drawable/edit_text_background"
-            android:hint="@string/hint_sleep"
+            android:hint="@string/hint_tap_to_set"
             android:inputType="datetime"
             android:minHeight="48dp"
             android:padding="12dp"
@@ -225,6 +264,33 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:text="@string/settings_schedule_hint"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="13sp" />
+
+        <!-- Night brightness -->
+        <TextView
+            android:id="@+id/nightBrightnessLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp"
+            tools:text="Screen brightness at night: 20%" />
+
+        <SeekBar
+            android:id="@+id/sbNightBrightness"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:max="100"
+            android:minHeight="48dp"
+            android:paddingVertical="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/settings_night_brightness_hint"
             android:textColor="@android:color/darker_gray"
             android:textSize="13sp" />
 
@@ -252,6 +318,14 @@
             android:text="@string/settings_alarm_enabled"
             android:textSize="16sp" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/settings_alarm_time"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp" />
+
         <EditText
             android:id="@+id/etAlarmTime"
             android:layout_width="match_parent"
@@ -260,7 +334,7 @@
             android:layout_marginBottom="16dp"
             android:autofillHints="@string/hint_wake"
             android:background="@drawable/edit_text_background"
-            android:hint="@string/settings_alarm_time"
+            android:hint="@string/hint_tap_to_set"
             android:inputType="datetime"
             android:minHeight="48dp"
             android:padding="12dp"
@@ -280,6 +354,15 @@
             android:minHeight="48dp"
             android:text="@string/settings_auto_start"
             android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/currentFolder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp"
+            tools:text="Showing photos from: Holidays" />
 
         <Button
             android:id="@+id/btnChangeFolder"

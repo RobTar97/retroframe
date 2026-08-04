@@ -6,6 +6,7 @@ import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.rober.photoframe.MainActivity
 import com.rober.photoframe.R
+import com.rober.photoframe.settings.PhotoframePreferences
 
 /**
  * Fullscreen clock.
@@ -16,6 +17,7 @@ import com.rober.photoframe.R
  */
 class ClockFragment : Fragment(R.layout.fragment_clock) {
     private lateinit var btnBackToPhotos: Button
+    private var burnInGuard: BurnInGuard? = null
 
     private val hideButton = Runnable { btnBackToPhotos.visibility = View.GONE }
 
@@ -34,6 +36,19 @@ class ClockFragment : Fragment(R.layout.fragment_clock) {
         btnBackToPhotos.setOnClickListener {
             (activity as? MainActivity)?.switchToPhotoMode()
         }
+
+        // The riskiest thing this app puts on a panel: 96sp of unchanging white digits, left
+        // up all night, every night.
+        if (PhotoframePreferences.burnInProtection) {
+            burnInGuard =
+                BurnInGuard(
+                    listOf(
+                        view.findViewById(R.id.clockTime),
+                        view.findViewById(R.id.clockAmPm),
+                        view.findViewById(R.id.clockDate),
+                    ),
+                ).also { it.start() }
+        }
     }
 
     private fun show() {
@@ -49,6 +64,8 @@ class ClockFragment : Fragment(R.layout.fragment_clock) {
 
     override fun onDestroyView() {
         btnBackToPhotos.removeCallbacks(hideButton)
+        burnInGuard?.stop()
+        burnInGuard = null
         super.onDestroyView()
     }
 
