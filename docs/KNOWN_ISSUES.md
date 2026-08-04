@@ -38,22 +38,18 @@ can do for the project** — more valuable than code.
 
 ## 🟠 Significant
 
-### 1. Subfolders are ignored
+### 1. Subfolders deeper than five levels are ignored
 
-The folder scan is one level deep. Photos organised into `2023/`, `2024/` subfolders will not
-be found, and the app will report the folder as empty.
+The scan descends five levels below the folder you pick, which covers
+`Photos/2019/Italy/Rome` comfortably. Anything deeper is not found, and neither is anything
+past the 10,000-item cap.
 
-The cursor-based scanner added in `0.2.0` makes recursion cheap to implement — each directory
-is one more query rather than hundreds of IPC calls — but it needs a depth limit and a cycle
-guard before it can ship.
+Both limits exist because the app has to point at an SD card without turning one folder pick
+into an unbounded number of queries on a single-core tablet. Raising them is a one-line change
+in `PhotoRepository`; knowing whether they are the *right* numbers needs a device report from
+someone with a genuinely large library.
 
-### 2. No visible progress while a large folder is scanning
-
-A folder with several thousand photos takes a noticeable moment to enumerate on slow eMMC
-storage. During that time the UI shows the previous state with no indication that anything is
-happening. `SlideshowState.Loading` exists and is simply not rendered.
-
-### 3. Video thumbnails are not shown before playback starts
+### 2. Video thumbnails are not shown before playback starts
 
 A video page is black until the player attaches and the first frame decodes. Extracting a
 thumbnail for the poster frame would remove the flash of black, at some cost in scan time.
@@ -62,7 +58,7 @@ thumbnail for the poster frame would remove the flash of black, at some cost in 
 
 ## 🟡 Minor
 
-### 4. Favourite weighting cannot space duplicates in tiny libraries
+### 3. Favourite weighting cannot space duplicates in tiny libraries
 
 With one or two photos where at least one is favourited, the playlist is mathematically too
 short to separate the copies — a favourite accounts for more than half the entries. The
@@ -71,21 +67,22 @@ the slideshow will visibly repeat.
 
 Only affects libraries of one or two photos, which is not a realistic photo frame.
 
-### 5. The alarm notification cannot be silenced from the app
+### 4. The alarm notification cannot be silenced from the app
 
 Dismissing clears the notification, but the sound is owned by the system notification
 channel. Once created, a channel's sound cannot be changed programmatically — the user has to
 go into system settings. Correct Android behaviour, but not obvious.
 
-### 6. Only English
+### 5. Only English
 
 All strings are extracted to `strings.xml` and ready for translation, but no other locale
 exists yet. `resourceConfigurations` is pinned to `en` to keep the APK small; that line needs
 updating when translations are added.
 
-### 7. Thin UI test coverage
+### 6. Thin UI test coverage
 
-30 unit tests cover the pure logic, and 14 instrumented tests now cover scheduling on the
+52 unit tests cover the pure logic — including the recursive folder walk, against a fake
+document provider — and 14 instrumented tests cover scheduling on the
 running API level, the manifest's permission and receiver guarantees, and clock mode. CI runs
 them on emulators at API 22, 28 and 36.
 
@@ -98,25 +95,39 @@ app's UI or adding a test-only backdoor to production code.
 
 ## ⚪ Cleanup
 
-### 8. Robolectric is pinned to SDK 34
+### 7. Robolectric is pinned to SDK 35
 
-`PlaylistBuilderTest` sets `@Config(sdk = [34])` because Robolectric 4.13 ships no shadows for
-API 36 while the app targets it. Harmless — the logic under test is SDK-independent — but it
-will need revisiting when Robolectric catches up.
+The Robolectric tests set `@Config(sdk = [35])` because Robolectric's SDK 36 shadows require
+Java 21 and this project builds on Java 17. Harmless — the logic under test is SDK-independent
+— but it will need revisiting when the toolchain moves.
 
-### 9. `SCHEDULE_EXACT_ALARMS` still requires a Play justification
+### 8. `SCHEDULE_EXACT_ALARM` still requires a Play justification
 
 Reduced but not eliminated. The wake/sleep schedule now uses inexact `setWindow` alarms, so
 only the morning alarm clock needs exactness — a much easier case to defend in review. The
 permission is still declared. See [PUBLISHING.md](PUBLISHING.md).
 
-### 10. `PhotoView` is unmaintained
+### 9. `PhotoView` is unmaintained
 
 `com.github.chrisbanes:PhotoView` has not had a release since 2019 and is pulled from JitPack.
 It works, and it is small, but it is a dependency with no upstream. Pinch-to-zoom could be
 implemented directly against `ScaleGestureDetector` if it ever becomes a problem.
 
 ---
+
+## Fixed in 0.3.0
+
+| Was | Now |
+|---|---|
+| Subfolders were ignored entirely — photos in `2019/` reported the folder as empty | Scanned five levels deep, capped at 10,000 items, on by default |
+| No indication that a large folder was being read | A spinner, which a recursive scan now genuinely needs |
+| Turning "Include videos" back on did nothing until something else forced a reload | Settings that change *what is read* trigger a rescan; settings that only change ordering do not |
+| The safety-net folder poll never looked inside subfolders | It walks the same ground the scan does |
+| Rotating the tablet stopped it holding the screen awake | Window flags reapplied on the restore path |
+| Sleep time meant full brightness or nothing | A night-brightness slider, applied per-window so Android undoes it on focus loss |
+| A static clock could permanently mark an OLED panel | It drifts a few millimetres a minute |
+| Times had to be typed as exactly `HH:mm` | The system clock picker |
+| Guava shipped in the APK unattributed | Listed in `NOTICE` and the in-app licence screen |
 
 ## Fixed in 0.2.0
 

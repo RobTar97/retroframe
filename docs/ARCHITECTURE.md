@@ -123,16 +123,34 @@ ran on a 10-second timer.
 them straight off the row:
 
 ```
-DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, treeDocumentId)
+DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, documentId)
    │  projection: DOCUMENT_ID, DISPLAY_NAME, MIME_TYPE, LAST_MODIFIED, SIZE
    ▼
-one ContentResolver.query() for the entire folder
-   │  skip directories · MediaTypes.classify() · drop videos if disabled
+one ContentResolver.query() per folder
+   │  MediaTypes.classify() · drop videos if disabled
+   │  directories → queued for the next depth level
    ▼
 List<MediaItem>
 ```
 
 One IPC round trip regardless of folder size.
+
+### Recursion, and why it is affordable
+
+The walk is breadth-first, one query per directory, bounded three ways:
+
+| Guard | Value | Why |
+|---|---|---|
+| `MAX_DEPTH` | 5 | Covers `Photos/2019/Italy/Rome`; stops an SD card becoming a thousand queries. **This is what guarantees the walk terminates.** |
+| `MAX_ITEMS` | 10,000 | The target device has 1 GB of RAM |
+| `visited` set | — | A provider can report a folder as its own descendant. This does not prevent an infinite loop — `MAX_DEPTH` does — it prevents a cycle being *re-walked at every remaining level*, which returns the same photo five times and makes the query count exponential |
+
+That distinction is not academic. The first version of the test for this compared sets rather
+than lists, so it passed with the visited set deleted. Mutation testing caught it.
+
+`signature()` walks exactly the same ground. A signature that only covered the top folder
+would report "nothing changed" forever while photos piled up in a subfolder — which is the
+one failure the safety-net poll exists to catch.
 
 ### Ordering
 

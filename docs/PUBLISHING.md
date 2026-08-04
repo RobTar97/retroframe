@@ -17,9 +17,14 @@ None of the channels below are reachable until these are done. All are tracked i
 - [x] ~~Remove the unused `READ_EXTERNAL_STORAGE` permission~~ — done in 0.2.0, along with
       `INTERNET` and `ACCESS_NETWORK_STATE`
 - [x] ~~Raise `targetSdk` to the Play minimum~~ — now API 36
-- [ ] **Verify the 0.2.0 rewrite on real hardware.** Nothing should ship before this
+- [ ] **Verify on real hardware.** Still the one open item, and still the one that matters.
+      CI runs the app on emulators at API 22, 28 and 36, which proves the code executes on
+      Android 5.1 — it proves nothing about a 2015 vendor ROM or a fortnight on a shelf
 - [x] ~~Create a signing keystore and wire up `keystore.properties`~~ — done; keep `retroframe-release.jks` backed up off this machine
-- [ ] Decide on a `versionCode` / `versionName` scheme and bump from 0.2.0
+- [x] ~~Decide on a `versionCode` / `versionName` scheme and bump from 0.2.0~~ — semver for
+      `versionName`, `versionCode` incremented by one per release; now at 2 / 0.3.0
+- [x] ~~Publish a privacy policy~~ — [PRIVACY.md](../PRIVACY.md), required by both Play and Play's
+      data-safety form, and linked from the app itself
 
 ### Releases are automated
 

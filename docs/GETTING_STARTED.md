@@ -225,8 +225,13 @@ The obvious `DocumentFile.listFiles()` costs an IPC round trip *per file per pro
 roughly 1,500 calls for a 500-photo folder — which is why it is not used. Details in
 [ARCHITECTURE.md](ARCHITECTURE.md).
 
-Subfolders are **not** scanned; only the folder you choose. Recursive scanning is on the
-roadmap.
+Subfolders **are** scanned, breadth-first, up to five levels below the folder you pick and
+capped at 10,000 items. That is only affordable because of the single-query design above —
+each directory costs one more query, not hundreds of IPC calls.
+
+Turn it off in Settings if you want strictly one folder. A visited-document-ID set guards
+against a provider that reports a folder as its own descendant, which old vendor ROMs with
+symlinked media directories genuinely do.
 
 ## Watching the logs
 
