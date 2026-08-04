@@ -10,6 +10,7 @@
     <!-- Empty states -->
     <string name="empty_no_folder">No folder chosen yet.\n\nTap Choose folder, then open the folder your photos are in and tap “Use this folder”.</string>
     <string name="empty_folder">That folder has no photos or videos in it.\n\nRetroFrame also looks inside folders within it, so if the pictures really are there, they may be more than five folders deep.</string>
+    <string name="empty_folder_no_subfolders">That folder has no photos or videos directly in it.\n\nIf your pictures are inside folders within it, switch on “Include folders inside it” in Settings.</string>
     <string name="select_folder">Choose folder</string>
     <string name="loading_folder">Reading your folder…</string>
 

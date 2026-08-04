@@ -373,7 +373,18 @@ class SlideshowFragment :
                     viewPager.setCurrentItem(0, false)
                     onSlideSelected(0)
                 }
-                SlideshowState.FolderEmpty -> showEmpty(R.string.empty_folder)
+                // Which advice is useful depends on the setting. Telling someone who has just
+                // switched subfolders off that the app looks inside subfolders sends them
+                // hunting for photos that are six levels deep when the real answer is one
+                // checkbox away.
+                SlideshowState.FolderEmpty ->
+                    showEmpty(
+                        if (PhotoframePreferences.includeSubfolders) {
+                            R.string.empty_folder
+                        } else {
+                            R.string.empty_folder_no_subfolders
+                        },
+                    )
                 SlideshowState.NoFolderSelected -> showEmpty(R.string.empty_no_folder)
                 SlideshowState.Loading -> showLoading()
             }
