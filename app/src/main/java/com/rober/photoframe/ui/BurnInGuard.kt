@@ -26,7 +26,24 @@ import android.view.View
  * step per [STEP_INTERVAL_MS] over [MAX_OFFSET_DP] is roughly a pixel a minute: invisible in
  * the moment, several hundred pixels of travel over a week.
  */
-class BurnInGuard(private val views: List<View>) {
+class BurnInGuard(
+    private val views: List<View>,
+    private val horizontal: Horizontal = Horizontal.CENTRED,
+) {
+    /**
+     * Which way the text is allowed to travel sideways.
+     *
+     * [CENTRED] content has room on both sides. Content pinned to an edge does not, and
+     * drifting towards that edge pushes it off the panel — which is exactly what happened to
+     * the slideshow's clock the first time this ran: the bar's right padding is sized to fit
+     * the time, so eight more pixels put the "PM" past the edge of the screen. It only showed
+     * up at 10:52; at 4:18 the string is a character shorter and everything looked fine.
+     */
+    enum class Horizontal {
+        CENTRED,
+        LEFTWARD,
+    }
+
     private var step = 0
     private var running = false
 
@@ -66,7 +83,14 @@ class BurnInGuard(private val views: List<View>) {
         val radius = MAX_OFFSET_DP * density
 
         val angle = TWO_PI * step / CYCLE_STEPS
-        val x = (radius * Math.cos(angle)).toFloat()
+        val cos = Math.cos(angle)
+        val x =
+            when (horizontal) {
+                // cos - 1 keeps the whole cycle in [-2r, 0], so the text never moves towards
+                // the edge it is pinned to. The travel is the same; only the sign is.
+                Horizontal.LEFTWARD -> (radius * (cos - 1.0)).toFloat()
+                Horizontal.CENTRED -> (radius * cos).toFloat()
+            }
         // Half the vertical travel: on a landscape frame there is more room to move sideways,
         // and vertical motion of the clock is the easier of the two to notice.
         val y = (radius * Math.sin(angle) * 0.5).toFloat()

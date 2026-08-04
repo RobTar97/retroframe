@@ -1,7 +1,6 @@
 package com.rober.photoframe.settings
 
 import android.app.TimePickerDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -84,6 +83,9 @@ class SettingsDialogFragment : DialogFragment() {
         setUpTimePicker(etWakeTime, defaultMinutes = DEFAULT_WAKE_MINUTES)
         setUpTimePicker(etSleepTime, defaultMinutes = DEFAULT_SLEEP_MINUTES)
         setUpTimePicker(etAlarmTime, defaultMinutes = DEFAULT_WAKE_MINUTES)
+        setUpClearButton(view.findViewById(R.id.btnClearWake), etWakeTime)
+        setUpClearButton(view.findViewById(R.id.btnClearSleep), etSleepTime)
+        setUpClearButton(view.findViewById(R.id.btnClearAlarm), etAlarmTime)
         setUpBrightnessSlider()
 
         loadSettings()
@@ -248,28 +250,33 @@ class SettingsDialogFragment : DialogFragment() {
         val start =
             if (existing == PhotoframePreferences.TIME_DISABLED) defaultMinutes else existing
 
-        val picker =
-            TimePickerDialog(
-                requireContext(),
-                { _, hour, minute ->
-                    field.setText(TimeOfDay.format(hour * 60 + minute).orEmpty())
-                    field.error = null
-                },
-                start / 60,
-                start % 60,
-                DateFormat.is24HourFormat(requireContext()),
-            )
+        // Deliberately OK and Cancel only.
+        //
+        // "Clear" belongs on the picker conceptually — every one of these times is optional —
+        // but adding a third button makes Android stack the button bar vertically, and in
+        // landscape the dialog is short enough that the bottom button falls off the end of it.
+        // On a tablet frame, which is landscape essentially always, that is unusable. Each
+        // field has its own Clear button in the layout instead.
+        TimePickerDialog(
+            requireContext(),
+            { _, hour, minute ->
+                field.setText(TimeOfDay.format(hour * 60 + minute).orEmpty())
+                field.error = null
+            },
+            start / 60,
+            start % 60,
+            DateFormat.is24HourFormat(requireContext()),
+        ).show()
+    }
 
-        // Every one of these times is optional, and a picker with no way out but a valid time
-        // would make "no schedule" unreachable once a schedule had been set.
-        picker.setButton(
-            DialogInterface.BUTTON_NEUTRAL,
-            getString(R.string.time_clear),
-        ) { _, _ ->
+    private fun setUpClearButton(
+        button: Button,
+        field: EditText,
+    ) {
+        button.setOnClickListener {
             field.setText("")
             field.error = null
         }
-        picker.show()
     }
 
     // ---------------------------------------------------------- night brightness

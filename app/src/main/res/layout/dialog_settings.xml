@@ -224,19 +224,35 @@
           listener and opens the system clock picker instead. They stay EditTexts so the
           existing setError() validation still has somewhere to show itself.
         -->
-        <EditText
-            android:id="@+id/etWakeTime"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="12dp"
-            android:autofillHints="@string/hint_wake"
-            android:background="@drawable/edit_text_background"
-            android:hint="@string/hint_tap_to_set"
-            android:inputType="datetime"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:textSize="16sp" />
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etWakeTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:autofillHints="@string/hint_wake"
+                android:background="@drawable/edit_text_background"
+                android:hint="@string/hint_tap_to_set"
+                android:inputType="datetime"
+                android:minHeight="48dp"
+                android:padding="12dp"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btnClearWake"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:minHeight="48dp"
+                android:text="@string/time_clear"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
@@ -245,19 +261,35 @@
             android:textColor="@android:color/darker_gray"
             android:textSize="14sp" />
 
-        <EditText
-            android:id="@+id/etSleepTime"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:autofillHints="@string/hint_sleep"
-            android:background="@drawable/edit_text_background"
-            android:hint="@string/hint_tap_to_set"
-            android:inputType="datetime"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:textSize="16sp" />
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etSleepTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:autofillHints="@string/hint_sleep"
+                android:background="@drawable/edit_text_background"
+                android:hint="@string/hint_tap_to_set"
+                android:inputType="datetime"
+                android:minHeight="48dp"
+                android:padding="12dp"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btnClearSleep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:minHeight="48dp"
+                android:text="@string/time_clear"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
@@ -326,19 +358,35 @@
             android:textColor="@android:color/darker_gray"
             android:textSize="14sp" />
 
-        <EditText
-            android:id="@+id/etAlarmTime"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
-            android:autofillHints="@string/hint_wake"
-            android:background="@drawable/edit_text_background"
-            android:hint="@string/hint_tap_to_set"
-            android:inputType="datetime"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:textSize="16sp" />
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etAlarmTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:autofillHints="@string/hint_wake"
+                android:background="@drawable/edit_text_background"
+                android:hint="@string/hint_tap_to_set"
+                android:inputType="datetime"
+                android:minHeight="48dp"
+                android:padding="12dp"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btnClearAlarm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:minHeight="48dp"
+                android:text="@string/time_clear"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <View
             android:layout_width="match_parent"

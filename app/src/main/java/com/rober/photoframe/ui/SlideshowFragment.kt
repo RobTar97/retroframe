@@ -97,6 +97,9 @@ class SlideshowFragment :
                         view.findViewById(R.id.dateText),
                         view.findViewById(R.id.clockText),
                     ),
+                    // The bar is right-aligned and its padding is sized to fit the time, so
+                    // there is nowhere to go but left.
+                    horizontal = BurnInGuard.Horizontal.LEFTWARD,
                 ).also { it.start() }
         }
 
